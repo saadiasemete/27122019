@@ -21,8 +21,10 @@ class Board(Base):
 class Post(Base):
     ___tablename__ = "post"
     id = Column(Integer, primary_key=True)
-    id_board = Column(Integer)
-    id_thread = Column(Integer, nullable=False)
+    id_board = Column(Integer, nullable=False)
+    id_thread = Column(Integer)
+
+    ip_address = Column(String(16), nullable=False)
 
     title = Column(String(70))
     text = Column(String(8192))
@@ -76,3 +78,17 @@ class Tripcode(Base):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+class Ban(Base):
+    ___tablename__ = "ban"
+    id = Column(Integer, primary_key=True)
+
+    board_id = Column(Integer, ForeignKey('board.id')) #foreign key, actually - also nullable
+    board = relationship("Board", back_populates="ban")
+
+    thread_id = Column(Integer, ForeignKey('post.id')) #foreign key, actually - also nullable
+    thread = relationship("Post", back_populates="ban")
+
+    ip_address = Column(String(16), nullable=False)
+
+    expires_at = Column(DateTime) #nullified => ban is eternal
