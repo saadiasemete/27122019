@@ -34,11 +34,7 @@ class Post(Base):
     
     password_hash = Column(String(128))
 
-
-    #one or the other must be fulfilled
-    is_thread = Column(Boolean, nullable=False)
-    
-    to_thread = Column(Integer)
+    to_thread = Column(Integer, default = 0)
     sage = Column(Boolean)
 
     timestamp = Column(DateTime, nullable=False)
