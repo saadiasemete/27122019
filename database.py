@@ -35,10 +35,6 @@ class Post(Base):
     password_hash = Column(String(128))
 
     to_thread = Column(Integer, default = 0)
-    sage = Column(Boolean)
-
-    timestamp = Column(DateTime, nullable=False)
-    timestamp_last_bump = Column(DateTime) #i just thought it would be too resource-consuming to compute it every time otherwise
 
     #https://dev.to/kaelscion/authentication-hashing-in-sqlalchemy-1bem
 
