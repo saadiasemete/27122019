@@ -67,7 +67,7 @@ def is_captcha_failed(post_data, db_session):
         elif captcha_result.answer != post_data['captcha_answer']:
             return "Wrong answer to the captcha"
 
-def create_post(post_data, db_session):
+def submit_post(post_data, db_session):
     """
     The order of checks matters for user experience.
     It should be this way:
