@@ -40,7 +40,7 @@ def create_post(board_id, post_data, db_session):
             return (False, "Ambiguous to_thread",)
     
     #not sure how efficient it is tho
-    ban_result = db_session.query(Ban.id).filter(Ban.ip_address == post_data['IP'] )
+    ban_result = db_session.query(Ban).filter(Ban.ip_address == post_data['IP'] )
     if db_session.exists(ban_result):
         if post_data['to_thread']:
             if db_session.exists(ban_result.filter(Ban.thread_id == post_data['to_thread'])):
