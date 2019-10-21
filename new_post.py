@@ -98,10 +98,6 @@ def create_post(post_data, db_session):
             "checker": is_board_rule_violated,
         },
         {
-            "checker": is_thread_rule_violated,
-            "condition": is_thread,
-        },
-        {
             "checker": is_captcha_failed,
             "condition": lambda a,b: False,
         },
