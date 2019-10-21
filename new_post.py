@@ -1,4 +1,4 @@
-from database import Board
+from database import Board, Ban, Post
 
 def create_post(board_id, post_data, db_session):
     """
@@ -19,6 +19,9 @@ def create_post(board_id, post_data, db_session):
     except:
         return (False, "Invalid board_id",)
     
+    #is thread or post
+    post_data['is_thread'] = not post_data.get('to_thread')
+    
     #make sure you post to existing board
     board_result = db_session.query(Board.id).filter(Board.id == post_data['id_board']).all()
     if not len(board_result):
@@ -26,8 +29,6 @@ def create_post(board_id, post_data, db_session):
     elif len(board_result)>1:
         return (False, "Ambiguous board id",)
 
-    #is thread or post
-    post_data['is_thread'] = not post_data.get('to_thread')
 
     #make sure you post to existing thread
     if post_data.get('is_thread'):
