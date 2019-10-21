@@ -39,12 +39,13 @@ def create_post(board_id, post_data, db_session):
         elif len(post_result)>1:
             return (False, "Ambiguous to_thread",)
     
-    #thread-scope ban check (if applicable)
-    db_session
-
-    #board-scope ban check
-
-    #global-scope ban check
+    ban_result = db_session.query(Ban.id).filter(Ban.ip_address == post_data['IP'] )
+    if db_session.exists(ban_result):
+        if post_data['to_thread']:
+            if db_session.exists(ban_result.filter(Ban.thread_id == post_data['to_thread'])):
+                return (False, "Banned in the thread",)
+        if db_session.exists(ban_result.filter(Ban.board_id == post_data['id_board'])):
+            return (False, "Banned on the board",)
 
 
     #TODO: thread requirements check (if applicable)
