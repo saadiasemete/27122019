@@ -88,3 +88,14 @@ class Ban(Base):
     ip_address = Column(String(16), nullable=False)
 
     expires_at = Column(DateTime) #nullified => ban is eternal
+
+
+class Captcha(Base):
+    ___tablename__ = "captcha"
+    id = Column(Integer, primary_key=True)
+    active = Column(Boolean, default=False)
+    answer = Column(String(32), nullable=False)
+
+    ip_address = Column(String(16), nullable=False)
+
+    timestamp = Column(DateTime, nullable=False) #nullified => captcha is eternal
