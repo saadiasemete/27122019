@@ -52,6 +52,9 @@ def create_post(board_id, post_data, db_session):
     #TODO: thread requirements check (if applicable)
 
     #board requirements check
+    board_result = db_session.query(Board).filter(Board.id == post_data['id_board'] ).first()
+    if board_result.read_only:
+        return (False, "This board is read only",)
 
     #TODO: captcha check
     
