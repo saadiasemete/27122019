@@ -31,8 +31,13 @@ def create_post(board_id, post_data, db_session):
 
 
     #make sure you post to existing thread
-    if post_data.get('is_thread'):
-        post_data['to_thread']
+    #notice: we assume that the post index is global
+    if not post_data.get('is_thread'):
+        post_result = db_session.query(Post.id).filter(Post.id == post_data['to_thread']).all()
+        if not len(post_result):
+            return (False, "to_thread does not exist",)
+        elif len(post_result)>1:
+            return (False, "Ambiguous to_thread",)
     
     #thread-scope ban check (if applicable)
     db_session
