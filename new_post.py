@@ -25,9 +25,9 @@ def create_post(board_id, post_data, db_session):
     #make sure you post to existing board
     board_result = db_session.query(Board.id).filter(Board.id == post_data['id_board']).all()
     if not len(board_result):
-        return (False, "Board id does not exist",)
+        return (False, "Board_id does not exist",)
     elif len(board_result)>1:
-        return (False, "Ambiguous board id",)
+        return (False, "Ambiguous board_id",)
 
 
     #make sure you post to existing thread
