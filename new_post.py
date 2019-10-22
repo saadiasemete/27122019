@@ -67,6 +67,40 @@ def is_captcha_failed(post_data, db_session):
         elif captcha_result.answer != post_data['captcha_answer']:
             return "Wrong answer to the captcha"
 
+def apply_transformations(post_data, db_session):
+    """
+    In case the post needs to be changed before getting to the db.
+    """
+    return post_data
+
+def create_post(post_data, db_session):
+    """
+    Assumes that the post is legit to be posted.
+    """
+    post_data = apply_transformations(post_data, db_session)
+    current_time = int(time.time())
+    new_post = Post(
+        id_board = post_data['board_id'],
+        id_thread = post_data.get('to_thread'),
+        reply_to = post_data.get('reply_to'),
+        ip_address = post_data['ip_address'],
+        title = post_data.get('title'),
+        text  = post_data.get('text'),
+        tripcode = post_data.get('tripcode'),
+        #password = post_data.get('password'),
+        sage = bool(post_data.get('sage')),
+        timestamp = post_data['timestamp'],
+    )
+    db_session.add(new_post)
+    if is_thread(post_data, db_session):
+        new_post.timestamp_last_bump = post_data['timestamp']
+    else:
+        db_session.query(Post).filter(id == post_data['reply_to']).first().timestamp_last_bump = post_data['timestamp'] 
+    db_session.commit
+    return (True, new_post)
+
+
+
 def submit_post(post_data, db_session):
     """
     The order of checks matters for user experience.
@@ -107,4 +141,5 @@ def submit_post(post_data, db_session):
             err_status = i['checker'](post_data, db_session)
             if err_status:
                 return (False, err_status)
-
+    post_data['timestamp'] = int(time.time())
+    return create_post(post_data, db_session)

@@ -23,6 +23,7 @@ class Post(Base):
     id = Column(Integer, primary_key=True)
     id_board = Column(Integer, nullable=False)
     id_thread = Column(Integer)
+    reply_to = Column(Integer)
 
     ip_address = Column(String(16), nullable=False)
 
