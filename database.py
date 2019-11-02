@@ -21,8 +21,11 @@ class Board(Base):
 class Post(Base):
     __tablename__ = "post"
     id = Column(Integer, primary_key=True)
-    id_board = Column(Integer, nullable=False)
-    id_thread = Column(Integer)
+
+    #number_in_thread = Column(Integer, nullable=False)
+
+    board_id = Column(Integer, nullable=False)
+
     reply_to = Column(Integer)
 
     ip_address = Column(String(16), nullable=False)

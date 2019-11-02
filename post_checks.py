@@ -12,8 +12,8 @@ def is_invalid_data(data, db_session):
 
 def is_invalid_board_id(data, db_session):
     try:
-        assert data['id_board'] #should be not null
-        data['id_board'] = int(data['id_board']) #should be an integer
+        assert data['board_id'] #should be not null
+        data['board_id'] = int(data['board_id']) #should be an integer
     except:
         return (404, "Invalid board_id")
     return None
@@ -22,7 +22,7 @@ def is_thread(data, db_session):
     return not data.get('to_thread')
 
 def is_board_inexistent(data, db_session):
-    board_result = db_session.query(Board.id).filter(Board.id == data['id_board']).all()
+    board_result = db_session.query(Board.id).filter(Board.id == data['board_id']).all()
     if not len(board_result):
         return (404, "board_id does not exist")
     elif len(board_result)>1:
@@ -43,12 +43,12 @@ def is_banned(data, db_session):
         if data['to_thread']:
             if db_session.exists(ban_result.filter(Ban.thread_id == data['to_thread'])):
                 return (403, "Banned in the thread")
-        if db_session.exists(ban_result.filter(Ban.board_id == data['id_board'])):
+        if db_session.exists(ban_result.filter(Ban.board_id == data['board_id'])):
             return (403, "Banned on the board")
     return None
 
 def is_board_rule_violated(data, db_session):
-    board_result = db_session.query(Board).filter(Board.id == data['id_board'] ).first()
+    board_result = db_session.query(Board).filter(Board.id == data['board_id'] ).first()
     if board_result.read_only:
         return  (403, "This board is read only")
     return None

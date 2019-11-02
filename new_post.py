@@ -17,8 +17,8 @@ def create_post(data, db_session):
     """
     data = apply_transformations(data, db_session)
     new_post = Post(
-        id_board = data['board_id'],
-        id_thread = data.get('to_thread'),
+        board_id = data['board_id'],
+        to_thread = data.get('to_thread'),
         reply_to = data.get('reply_to'),
         ip_address = data['ip_address'],
         title = data.get('title'),
