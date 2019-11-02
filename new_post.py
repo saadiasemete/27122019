@@ -16,7 +16,6 @@ def create_post(post_data, db_session):
     Assumes that the post is legit to be posted.
     """
     post_data = apply_transformations(post_data, db_session)
-    current_time = int(time.time())
     new_post = Post(
         id_board = post_data['board_id'],
         id_thread = post_data.get('to_thread'),

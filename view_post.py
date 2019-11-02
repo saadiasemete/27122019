@@ -2,7 +2,7 @@ from database import Board, Ban, Post, Captcha
 import time
 import cfg
 from sqlalchemy import and_
-from post_checks import *
+from post_checks import is_invalid_data, is_board_inexistent
 
 def view_post(post_data, db_session):
     """
