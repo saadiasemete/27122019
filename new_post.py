@@ -5,40 +5,40 @@ from sqlalchemy import and_
 from post_checks import *
 
 
-def apply_transformations(post_data, db_session):
+def apply_transformations(data, db_session):
     """
     In case the post needs to be changed before getting to the db.
     """
-    return post_data
+    return data
 
-def create_post(post_data, db_session):
+def create_post(data, db_session):
     """
     Assumes that the post is legit to be posted.
     """
-    post_data = apply_transformations(post_data, db_session)
+    data = apply_transformations(data, db_session)
     new_post = Post(
-        id_board = post_data['board_id'],
-        id_thread = post_data.get('to_thread'),
-        reply_to = post_data.get('reply_to'),
-        ip_address = post_data['ip_address'],
-        title = post_data.get('title'),
-        text  = post_data.get('text'),
-        tripcode = post_data.get('tripcode'),
-        #password = post_data.get('password'),
-        sage = bool(post_data.get('sage')),
-        timestamp = post_data['timestamp'],
+        id_board = data['board_id'],
+        id_thread = data.get('to_thread'),
+        reply_to = data.get('reply_to'),
+        ip_address = data['ip_address'],
+        title = data.get('title'),
+        text  = data.get('text'),
+        tripcode = data.get('tripcode'),
+        #password = data.get('password'),
+        sage = bool(data.get('sage')),
+        timestamp = data['timestamp'],
     )
     db_session.add(new_post)
-    if is_thread(post_data, db_session):
-        new_post.timestamp_last_bump = post_data['timestamp']
+    if is_thread(data, db_session):
+        new_post.timestamp_last_bump = data['timestamp']
     else:
-        db_session.query(Post).filter(id == post_data['reply_to']).first().timestamp_last_bump = post_data['timestamp'] 
+        db_session.query(Post).filter(id == data['reply_to']).first().timestamp_last_bump = data['timestamp'] 
     db_session.commit
     return (201, new_post)
 
 
 
-def submit_post(post_data, db_session):
+def submit_post(data, db_session):
     """
     The order of checks matters for user experience.
     It should be this way:
@@ -74,9 +74,9 @@ def submit_post(post_data, db_session):
         },
     ]
     for i in checkers:
-        if (i.get('condition') and i['condition'](post_data, db_session)) or not i.get('condition'):
-            err_status = i['checker'](post_data, db_session)
+        if (i.get('condition') and i['condition'](data, db_session)) or not i.get('condition'):
+            err_status = i['checker'](data, db_session)
             if err_status:
                 return err_status
-    post_data['timestamp'] = int(time.time())
-    return create_post(post_data, db_session)
+    data['timestamp'] = int(time.time())
+    return create_post(data, db_session)
