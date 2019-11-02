@@ -10,7 +10,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 Base = declarative_base()
 
 class Board(Base):
-    ___tablename__ = "board"
+    __tablename__ = "board"
     id = Column(Integer, primary_key=True)
     name = Column(String(32), nullable=False)
     address = Column(String(32), nullable=False)
@@ -19,7 +19,7 @@ class Board(Base):
     read_only = Column(Boolean, default=False)
     
 class Post(Base):
-    ___tablename__ = "post"
+    __tablename__ = "post"
     id = Column(Integer, primary_key=True)
     id_board = Column(Integer, nullable=False)
     id_thread = Column(Integer)
@@ -50,7 +50,7 @@ class Post(Base):
         return check_password_hash(self.password_hash, password)
 
 class Admin(Base):
-    ___tablename__ = "admin"
+    __tablename__ = "admin"
     id = Column(Integer, primary_key=True)
     is_master = Column(Boolean, nullable=False)
     username = Column(String(32), nullable=False)
@@ -65,7 +65,7 @@ class Admin(Base):
         return check_password_hash(self.password_hash, password)
 
 class Tripcode(Base):
-    ___tablename__ = "tripcode"
+    __tablename__ = "tripcode"
     id = Column(Integer, primary_key=True)
     login = Column(String(32), nullable=False)
     password_hash = Column(String(128), nullable=False)
@@ -77,7 +77,7 @@ class Tripcode(Base):
         return check_password_hash(self.password_hash, password)
 
 class Ban(Base):
-    ___tablename__ = "ban"
+    __tablename__ = "ban"
     id = Column(Integer, primary_key=True)
 
     board_id = Column(Integer, ForeignKey('board.id')) #foreign key, actually - also nullable
@@ -92,7 +92,7 @@ class Ban(Base):
 
 
 class Captcha(Base):
-    ___tablename__ = "captcha"
+    __tablename__ = "captcha"
     id = Column(Integer, primary_key=True)
     active = Column(Boolean, default=False)
     answer = Column(String(32), nullable=False)
