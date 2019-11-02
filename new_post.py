@@ -52,6 +52,9 @@ def submit_post(data, db_session):
             "checker": is_invalid_data,
         },
         {
+            "checker": is_invalid_board_id,
+        },
+        {
             "checker": is_board_inexistent,
         },
         {

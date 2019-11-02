@@ -7,8 +7,12 @@ from sqlalchemy import and_
 def is_invalid_data(data, db_session):
     if not isinstance(data, dict): #should be a valid json dict
         return (400, "Unparseable data")
+    
+    return None
+
+def is_invalid_board_id(data, db_session):
     try:
-        assert board_id #should be not null
+        assert data['id_board'] #should be not null
         data['id_board'] = int(data['id_board']) #should be an integer
     except:
         return (404, "Invalid board_id")
