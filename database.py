@@ -14,6 +14,7 @@ class Board(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(32), nullable=False)
     address = Column(String(32), nullable=False)
+    description = Column(String(256), nullable=False)
     hidden = Column(Boolean, default=False)
     admin_only = Column(Boolean, default=False)
     read_only = Column(Boolean, default=False)
