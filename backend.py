@@ -3,6 +3,7 @@ from new_post import submit_post
 from view_post import open_post
 from new_board import submit_board
 from sqlalchemy import create_engine
+from database import meta
 
 from sqlalchemy.orm import sessionmaker
 
@@ -81,4 +82,6 @@ def new_board():
     response.status_code = answer[0]
     return response
 
+#DELETE AFTER DEBUG
+meta.create_all(engine)
 app.run(debug = True)

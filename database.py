@@ -3,14 +3,16 @@ import sys
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, MetaData
 from werkzeug.security import generate_password_hash, check_password_hash
 
+meta = MetaData()
 
 Base = declarative_base()
 
 class Board(Base):
     __tablename__ = "board"
+    metadata = meta
     id = Column(Integer, primary_key=True)
     name = Column(String(32), nullable=False)
     address = Column(String(32), nullable=False)
@@ -22,6 +24,7 @@ class Board(Base):
     
 class Post(Base):
     __tablename__ = "post"
+    metadata = meta
     id = Column(Integer, primary_key=True)
 
     #number_in_thread = Column(Integer, nullable=False)
@@ -56,6 +59,7 @@ class Post(Base):
 
 class Admin(Base):
     __tablename__ = "admin"
+    metadata = meta
     id = Column(Integer, primary_key=True)
     is_master = Column(Boolean, nullable=False)
     username = Column(String(32), nullable=False)
@@ -71,6 +75,7 @@ class Admin(Base):
 
 class Tripcode(Base):
     __tablename__ = "tripcode"
+    metadata = meta
     id = Column(Integer, primary_key=True)
     login = Column(String(32), nullable=False)
     password_hash = Column(String(128), nullable=False)
@@ -83,6 +88,7 @@ class Tripcode(Base):
 
 class Ban(Base):
     __tablename__ = "ban"
+    metadata = meta
     id = Column(Integer, primary_key=True)
 
     board_id = Column(Integer, ForeignKey('board.id')) #foreign key, actually - also nullable
@@ -98,6 +104,7 @@ class Ban(Base):
 
 class Captcha(Base):
     __tablename__ = "captcha"
+    metadata = meta
     id = Column(Integer, primary_key=True)
     active = Column(Boolean, default=False)
     answer = Column(String(32), nullable=False)
