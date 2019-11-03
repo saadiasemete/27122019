@@ -2,7 +2,7 @@ import requests
 
 def create_b():
     return requests.post(
-        "127.0.0.1:5000/api/new_board",
+        "http://127.0.0.1:5000/api/new_board",
         {
             "name": "Бред",
             "address": "b",
@@ -16,7 +16,7 @@ def create_b():
 
 def create_thread(board_id):
     return requests.post(
-        "127.0.0.1:5000/api/new_board",
+        "127.0.0.1:5000/api/new_thread",
         {
             "board_id": board_id,
             "to_thread": 0,
@@ -32,7 +32,7 @@ def create_thread(board_id):
 
 def reply_to_thread(to_thread):
     return requests.post(
-        "127.0.0.1:5000/api/new_board",
+        "127.0.0.1:5000/api/new_post",
         {
             "board_id": 1,
             "to_thread": to_thread,
@@ -65,6 +65,6 @@ def launch_tests_01():
             
 
 
-
+launch_tests_01()
 
 

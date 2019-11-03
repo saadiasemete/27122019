@@ -61,6 +61,7 @@ def new_board():
     """
     should be allowed after authorization only
     """
+    print(request.form)
     answer = submit_board(request.form, SA_Session())
     if answer[0]==201: #HTTP 201: CREATED
         response = app.make_response(
@@ -79,3 +80,5 @@ def new_board():
         )
     response.status_code = answer[0]
     return response
+
+app.run(debug = True)
