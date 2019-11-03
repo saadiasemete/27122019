@@ -29,7 +29,7 @@ class Post(Base):
 
     #number_in_thread = Column(Integer, nullable=False)
 
-    board_id = Column(Integer, nullable=False)
+    board_id = Column(Integer, ForeignKey('tripcode.id'), nullable = False)
 
     reply_to = Column(Integer)
 
@@ -39,7 +39,6 @@ class Post(Base):
     text = Column(String(8192))
 
     tripcode_id = Column(Integer, ForeignKey('tripcode.id')) #foreign key, actually - also nullable
-    tripcode = relationship("Tripcode", back_populates="post")
     
     password_hash = Column(String(128))
 
@@ -66,7 +65,6 @@ class Admin(Base):
     login = Column(String(32), nullable=False)
     password_hash = Column(String(128), nullable=False)
     board_id = Column(Integer, ForeignKey('board.id')) #foreign key, actually - also nullable
-    board = relationship("Board", back_populates="admin")
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -92,10 +90,8 @@ class Ban(Base):
     id = Column(Integer, primary_key=True)
 
     board_id = Column(Integer, ForeignKey('board.id')) #foreign key, actually - also nullable
-    board = relationship("Board", back_populates="ban")
 
     thread_id = Column(Integer, ForeignKey('post.id')) #foreign key, actually - also nullable
-    thread = relationship("Post", back_populates="ban")
 
     ip_address = Column(String(16), nullable=False)
 

@@ -9,7 +9,8 @@ from sqlalchemy.orm import sessionmaker
 
 app = Flask(__name__)
 
-engine = create_engine('sqlite:///:memory:', echo=True)
+#engine = create_engine('sqlite:///:memory:', echo=True)
+engine = create_engine('sqlite:///here.db', echo=True)
 SA_Session = sessionmaker(bind=engine)
 
 def json_from_sqlalchemy_row(row):
@@ -17,7 +18,7 @@ def json_from_sqlalchemy_row(row):
 
 @app.route('/api/new_post', methods = ['POST'])
 def new_post():
-    answer = submit_post(request.form, SA_Session())
+    answer = submit_post(dict(request.form.to_dict()), SA_Session())
     if answer[0]==201: #HTTP 201: CREATED
         response = app.make_response(
             {
@@ -62,8 +63,8 @@ def new_board():
     """
     should be allowed after authorization only
     """
-    print(request.form)
-    answer = submit_board(request.form, SA_Session())
+    print(request.form.to_dict())
+    answer = submit_board(dict(request.form.to_dict()), SA_Session())
     if answer[0]==201: #HTTP 201: CREATED
         response = app.make_response(
             {
