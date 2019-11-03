@@ -62,7 +62,7 @@ def new_board():
     should be allowed after authorization only
     """
     answer = submit_board(request.form, SA_Session())
-    if answer[0]==201: #HTTP 201: bbCREATED
+    if answer[0]==201: #HTTP 201: CREATED
         response = app.make_response(
             {
                 'result': True,
