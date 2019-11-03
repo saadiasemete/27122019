@@ -1,6 +1,7 @@
 from flask import Flask, request
 from new_post import submit_post
 from view_post import open_post
+from new_board import submit_board
 from sqlalchemy import create_engine
 
 from sqlalchemy.orm import sessionmaker
@@ -38,6 +39,30 @@ def new_post():
 def view_post():
     answer = open_post(request.view_args, SA_Session())
     if answer[0]==200: #HTTP 200: OK
+        response = app.make_response(
+            {
+                'result': True,
+                'data': json_from_sqlalchemy_row(answer[1]),
+            }
+        )
+
+    else:
+        response = app.make_response(
+            {
+                'result': False,
+                'data': answer[1],
+            }
+        )
+    response.status_code = answer[0]
+    return response
+
+@app.route('/api/new_board', methods = ['POST'])
+def new_board():
+    """
+    should be allowed after authorization only
+    """
+    answer = submit_board(request.form, SA_Session())
+    if answer[0]==201: #HTTP 201: bbCREATED
         response = app.make_response(
             {
                 'result': True,
