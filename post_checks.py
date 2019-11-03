@@ -31,7 +31,8 @@ def is_board_inexistent(data, db_session):
 
 
 def is_board_address_existent(data, db_session):
-    board_result = db_session.query(Board.address).filter(Board.address == data['board_address']).all()
+    board_address = data.get('board_address', data['address']) #for API clients convenience
+    board_result = db_session.query(Board.address).filter(Board.address == board_address).all()
     if len(board_result)==1:
         return (403, "board_address exists")
     elif len(board_result)>1:
