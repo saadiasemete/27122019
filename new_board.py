@@ -17,7 +17,6 @@ def create_board(data, db_session):
     """
     data = apply_transformations(data, db_session)
     new_board = Board(
-        id = data['board_id'],
         name = data['name'],
         address = data['address'],
         title = data.get('description'),
@@ -36,12 +35,6 @@ def submit_board(data, db_session):
     checkers = [
         {
             "checker": post_checks.is_invalid_data,
-        },
-        {
-            "checker": post_checks.is_invalid_board_id,
-        },
-        {
-            "checker": post_checks.is_board_existent,
         },
         {
             "checker": post_checks.is_board_address_existent,
