@@ -19,7 +19,7 @@ def create_board(data, db_session):
     new_board = Board(
         name = data['name'],
         address = data['address'],
-        title = data.get('description'),
+        description = data.get('description'),
         created_at = data['timestamp'],
         hidden = data.get('hidden'),
         admin_only = data.get('admin_only'),
