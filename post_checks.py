@@ -29,6 +29,22 @@ def is_board_inexistent(data, db_session):
         return (500, "Ambiguous board_id")
     return None
 
+def is_board_existent(data, db_session):
+    board_result = db_session.query(Board.id).filter(Board.id == data['board_id']).all()
+    if len(board_result)==1:
+        return (403, "board_id exists")
+    elif len(board_result)>1:
+        return (500, "Ambiguous board_id")
+    return None
+
+def is_board_address_existent(data, db_session):
+    board_result = db_session.query(Board.address).filter(Board.address == data['board_address']).all()
+    if len(board_result)==1:
+        return (403, "board_address exists")
+    elif len(board_result)>1:
+        return (500, "Ambiguous board_address")
+    return None
+
 def is_thread_inexistent(data, db_session):
     post_result = db_session.query(Post.id).filter(Post.id == data['to_thread']).all()
     if not len(post_result):

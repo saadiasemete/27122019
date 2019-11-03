@@ -2,7 +2,7 @@ from database import Board, Ban, Post, Captcha
 import time
 import cfg
 from sqlalchemy import and_
-from post_checks import *
+import post_checks
 
 
 def apply_transformations(data, db_session):
@@ -29,11 +29,11 @@ def create_post(data, db_session):
         timestamp = data['timestamp'],
     )
     db_session.add(new_post)
-    if is_thread(data, db_session):
+    if post_checks.is_thread(data, db_session):
         new_post.timestamp_last_bump = data['timestamp']
     else:
         db_session.query(Post).filter(id == data['reply_to']).first().timestamp_last_bump = data['timestamp'] 
-    db_session.commit
+    db_session.commit()
     return (201, new_post)
 
 
@@ -49,30 +49,30 @@ def submit_post(data, db_session):
     """
     checkers = [
         {
-            "checker": is_invalid_data,
+            "checker": post_checks.is_invalid_data,
         },
         {
-            "checker": is_invalid_board_id,
+            "checker": post_checks.is_invalid_board_id,
         },
         {
-            "checker": is_board_inexistent,
+            "checker": post_checks.is_board_inexistent,
         },
         {
-            "checker": is_thread_inexistent,
-            "condition": is_thread,
+            "checker": post_checks.is_thread_inexistent,
+            "condition": post_checks.is_thread,
         },
         {
-            "checker": is_banned,
+            "checker": post_checks.is_banned,
         },
         {
-            "checker": is_thread_rule_violated,
-            "condition": is_thread,
+            "checker": post_checks.is_thread_rule_violated,
+            "condition": post_checks.is_thread,
         },
         {
-            "checker": is_board_rule_violated,
+            "checker": post_checks.is_board_rule_violated,
         },
         {
-            "checker": is_captcha_failed,
+            "checker": post_checks.is_captcha_failed,
             "condition": lambda a,b: False,
         },
     ]

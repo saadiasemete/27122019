@@ -2,7 +2,7 @@ from database import Board, Ban, Post, Captcha
 import time
 import cfg
 from sqlalchemy import and_
-from post_checks import is_invalid_data, is_board_inexistent
+import post_checks
 
 def view_post(data, db_session):
     """
@@ -17,10 +17,10 @@ def view_post(data, db_session):
 def open_post(data, db_session):
     checkers = [
         {
-            "checker": is_invalid_data,
+            "checker": post_checks.is_invalid_data,
         },
         {
-            "checker": is_board_inexistent,
+            "checker": post_checks.is_board_inexistent,
         },
         #{
         #    "checker": is_thread_inexistent,

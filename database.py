@@ -15,6 +15,7 @@ class Board(Base):
     name = Column(String(32), nullable=False)
     address = Column(String(32), nullable=False)
     description = Column(String(256), nullable=False)
+    created_at = Column(DateTime, nullable=False)
     hidden = Column(Boolean, default=False)
     admin_only = Column(Boolean, default=False)
     read_only = Column(Boolean, default=False)
