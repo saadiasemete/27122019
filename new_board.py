@@ -3,6 +3,7 @@ import time
 import cfg
 from sqlalchemy import and_
 import post_checks
+import current_timestamp
 
 
 def apply_transformations(data, db_session):
@@ -45,5 +46,5 @@ def submit_board(data, db_session):
             err_status = i['checker'](data, db_session)
             if err_status:
                 return err_status
-    data['timestamp'] = int(time.time())
+    data['timestamp'] = current_timestamp.current_timestamp()
     return create_board(data, db_session)

@@ -3,7 +3,7 @@ import requests
 def create_b():
     return requests.post(
         "http://127.0.0.1:5000/api/new_board",
-        {
+        json = {
             "name": "Бред",
             "address": "b",
             "description": "Тестовый /b/",
@@ -16,8 +16,8 @@ def create_b():
 
 def create_thread(board_id):
     return requests.post(
-        "127.0.0.1:5000/api/new_thread",
-        {
+        "http://127.0.0.1:5000/api/new_post",
+        json = {
             "board_id": board_id,
             "to_thread": 0,
             "reply_to": None,
@@ -32,8 +32,8 @@ def create_thread(board_id):
 
 def reply_to_thread(to_thread):
     return requests.post(
-        "127.0.0.1:5000/api/new_post",
-        {
+        "http://127.0.0.1:5000/api/new_post",
+        json = {
             "board_id": 1,
             "to_thread": to_thread,
             "reply_to": 1,
@@ -50,14 +50,17 @@ def launch_tests_01():
     answer = create_b()
     try:
         b_json = answer.json()
+        assert b_json['result']
         print("/b/ has been created")
         print(b_json)
-        answer = create_thread(b_json['id'])
+        answer = create_thread(b_json['data']['id'])
         thread_json = answer.json()
+        assert thread_json['result']
         print("thread has been created")
         print(thread_json)
-        answer = reply_to_thread(thread_json['id'])
+        answer = reply_to_thread(thread_json['data']['id'])
         reply_json = answer.json()
+        assert reply_json['result']
         print("post has been created")
         print(reply_json)
     except:

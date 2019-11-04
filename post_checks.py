@@ -13,12 +13,13 @@ def is_invalid_data(data, db_session):
 def is_invalid_board_id(data, db_session):
     try:
         assert data['board_id'] #should be not null
-        data['board_id'] = int(data['board_id']) #should be an integer
+        data['board_id'] = data['board_id'] #should be an integer
     except:
         return (404, "Invalid board_id")
     return None
 
 def is_thread(data, db_session):
+    pass
     return not data.get('to_thread')
 
 def is_board_inexistent(data, db_session):
@@ -40,6 +41,8 @@ def is_board_address_existent(data, db_session):
     return None
 
 def is_thread_inexistent(data, db_session):
+    if not data.get('to_thread'):
+        return None
     post_result = db_session.query(Post.id).filter(Post.id == data['to_thread']).all()
     if not len(post_result):
         return (404, "to_thread does not exist")
@@ -48,12 +51,12 @@ def is_thread_inexistent(data, db_session):
     return None
 
 def is_banned(data, db_session):
-    ban_result = db_session.query(Ban).filter(Ban.ip_address == data['IP'] )
-    if db_session.exists(ban_result):
+    ban_result = db_session.query(Ban).filter(Ban.ip_address == data['ip_address'] )
+    if len(ban_result.all()):
         if data['to_thread']:
-            if db_session.exists(ban_result.filter(Ban.thread_id == data['to_thread'])):
+            if len(ban_result.filter(Ban.thread_id == data['to_thread']).all()):
                 return (403, "Banned in the thread")
-        if db_session.exists(ban_result.filter(Ban.board_id == data['board_id'])):
+        if len(ban_result.filter(Ban.board_id == data['board_id']).all()):
             return (403, "Banned on the board")
     return None
 

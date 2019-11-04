@@ -3,6 +3,7 @@ import time
 import cfg
 from sqlalchemy import and_
 import post_checks
+import current_timestamp
 
 
 def apply_transformations(data, db_session):
@@ -23,7 +24,7 @@ def create_post(data, db_session):
         ip_address = data['ip_address'],
         title = data.get('title'),
         text  = data.get('text'),
-        tripcode = data.get('tripcode'),
+        #tripcode = data.get('tripcode'),
         #password = data.get('password'),
         sage = bool(data.get('sage')),
         timestamp = data['timestamp'],
@@ -32,7 +33,7 @@ def create_post(data, db_session):
     if post_checks.is_thread(data, db_session):
         new_post.timestamp_last_bump = data['timestamp']
     else:
-        db_session.query(Post).filter(id == data['reply_to']).first().timestamp_last_bump = data['timestamp'] 
+        db_session.query(Post).filter(Post.id == data['reply_to']).first().timestamp_last_bump = data['timestamp'] 
     db_session.commit()
     return (201, new_post)
 
@@ -81,5 +82,5 @@ def submit_post(data, db_session):
             err_status = i['checker'](data, db_session)
             if err_status:
                 return err_status
-    data['timestamp'] = int(time.time())
+    data['timestamp'] = current_timestamp.current_timestamp()
     return create_post(data, db_session)
