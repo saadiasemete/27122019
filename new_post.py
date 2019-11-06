@@ -1,6 +1,5 @@
 from database import Board, Ban, Post, Captcha
 import time
-import cfg
 from sqlalchemy import and_
 import post_checks
 import current_timestamp

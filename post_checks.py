@@ -1,6 +1,5 @@
 from database import Board, Ban, Post, Captcha
 import time
-import cfg
 from sqlalchemy import and_
 
 
@@ -72,12 +71,13 @@ def is_thread_rule_violated(data, db_session):
     return False
 
 def is_captcha_failed(data, db_session):
-    if cfg.captcha_on:
+    #if cfg.captcha_on:
+    if data['__config__']['CAPTCHA_ON']:
         captcha_result = db_session.query(Captcha).filter( 
             and_(
                 Captcha.id == data['captcha_id'], 
                 Captcha.active == True,
-                Captcha.timestamp > time.time() - cfg.captcha_lifespan,
+                Captcha.timestamp > time.time() - data['__config__']['CAPTCHA_LIFESPAN'],
             )
         ).first()
         if not captcha_result:

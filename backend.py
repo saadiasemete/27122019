@@ -14,6 +14,12 @@ app = Flask(__name__)
 engine = create_engine('sqlite:///here.db', echo=True)
 SA_Session = sessionmaker(bind=engine)
 
+def append_to_data(data):
+    app.config.from_json("cfg.json")
+    data['__headers__'] = request.headers
+    data['__config__'] = app.config
+    return data
+
 def get_data_mimetype_agnostic():
     """
     I'm still figuring this out and not sure
@@ -21,9 +27,9 @@ def get_data_mimetype_agnostic():
     depending on the mimetype.
     """
     if request.is_json:
-        return (request.json,)
+        return (append_to_data(request.json),)
     elif request.form:
-        return (request.form.to_dict(),)
+        return (append_to_data(request.form.to_dict()),)
 
 def json_from_sqlalchemy_row(row):
     row.id #let sqlalchemy refresh the object
