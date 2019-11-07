@@ -20,6 +20,7 @@ def append_to_data(data):
     data['__headers__'] = request.headers
     data['__config__'] = app.config
     data['__files__'] = request.files
+    data['ip_address'] = request.remote_addr
     return data
 
 def get_data_mimetype_agnostic():

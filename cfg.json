@@ -2,6 +2,6 @@
     "CAPTCHA_ON": false,
     "CAPTCHA_LIFESPAN": 600,
     "SECRET_KEY": "admin",
-    "TESTING": false,
-    "DEBUG": false
+    "TESTING": true,
+    "DEBUG": true
 }

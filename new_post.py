@@ -32,7 +32,8 @@ def create_post(data, db_session):
     if post_checks.is_thread(data, db_session):
         new_post.timestamp_last_bump = data['timestamp']
     else:
-        db_session.query(Post).filter(Post.id == data['reply_to']).first().timestamp_last_bump = data['timestamp'] 
+        if not data.get('sage'):
+            db_session.query(Post).filter(Post.id == data['reply_to']).first().timestamp_last_bump = data['timestamp'] 
     db_session.commit()
     return (201, new_post)
 
