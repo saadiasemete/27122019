@@ -30,11 +30,12 @@ def get_data_mimetype_agnostic():
     depending on the mimetype.
     """
     if request.is_json:
-        return (append_to_data(request.json),)
+        result = request.json
     elif request.form:
-        return (append_to_data(request.form.to_dict()),)
+       result = request.form.to_dict()
     elif request.method == 'GET':
-        return request.view_args if request.view_args else {}
+        result = request.view_args if request.view_args else {}
+    return (append_to_data(result),)
 
 
 def json_from_sqlalchemy_row(row):
