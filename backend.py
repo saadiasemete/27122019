@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 from flask.views import View
-from new_post import submit_post
-from view_post import open_post
-from new_board import submit_board
+from new_post import SubmitPost
+from view_post import OpenPost
+from new_board import SubmitBoard
 from sqlalchemy import create_engine
 from database import meta
 import time
@@ -45,15 +45,15 @@ def json_from_sqlalchemy_row(row):
 class StandardRequest(View):
     data_fetcher = get_data_mimetype_agnostic
     target_status = 200
-    query_processing = NotImplemented
-    answer_processing = json_from_sqlalchemy_row
+    query_processor = NotImplemented
+    answer_processor = json_from_sqlalchemy_row
     def dispatch_request(self):
         data = self.__class__.data_fetcher()
-        answer = self.__class__.query_processing(data[0], SA_Session())
+        answer = self.__class__.query_processor.process(data[0], SA_Session())
         if answer[0]==201: #HTTP 201: CREATED
             response = {
                     'result': True,
-                    'data': self.__class__.answer_processing(answer[1]),
+                    'data': self.__class__.answer_processor(answer[1]),
                 }
         else:
             response = {
@@ -64,15 +64,15 @@ class StandardRequest(View):
 
 class NewBoard(StandardRequest):
     target_status = 201
-    query_processing = submit_board
+    query_processor = SubmitBoard
 
 class NewPost(StandardRequest):
     target_status = 201
-    query_processing = submit_post
+    query_processor = SubmitPost
 
 class ViewPost(StandardRequest):
     target_status = 200
-    query_processing = open_post
+    query_processor = OpenPost
 
 app.add_url_rule('/api/new_board', view_func = NewBoard.as_view('new_board'), methods = ['POST'])
 app.add_url_rule('/api/new_post', view_func = NewPost.as_view('new_post'), methods = ['POST'])
