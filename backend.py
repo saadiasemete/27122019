@@ -50,7 +50,9 @@ class StandardRequest(View):
     answer_processor = json_from_sqlalchemy_row
     def dispatch_request(self):
         data = self.__class__.data_fetcher()
-        answer = self.__class__.query_processor.process(data[0], SA_Session())
+        db_session = SA_Session()
+        answer = self.__class__.query_processor.process(data[0], db_session)
+        db_session.close()
         if answer[0]==201: #HTTP 201: CREATED
             response = {
                     'result': True,
