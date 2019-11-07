@@ -3,17 +3,17 @@ from flask.views import View
 from new_post import SubmitPost
 from view_post import OpenPost
 from new_board import SubmitBoard
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, sc
 from database import meta
 import time
 
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 
 app = Flask(__name__)
 
 #engine = create_engine('sqlite:///:memory:', echo=True)
 engine = create_engine('sqlite:///here.db', echo=True)
-SA_Session = sessionmaker(bind=engine)
+db_session = scoped_session(sessionmaker(bind=engine))
 
 def append_to_data(data):
     app.config.from_json("cfg.json")
@@ -42,6 +42,9 @@ def json_from_sqlalchemy_row(row):
     row.id #let sqlalchemy refresh the object
     return {i.name: row.__dict__.get(i.name) for i in row.__table__.columns}
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
 
 class StandardRequest(View):
     data_fetcher = get_data_mimetype_agnostic
@@ -50,9 +53,7 @@ class StandardRequest(View):
     answer_processor = json_from_sqlalchemy_row
     def dispatch_request(self):
         data = self.__class__.data_fetcher()
-        db_session = SA_Session()
         answer = self.__class__.query_processor.process(data[0], db_session)
-        db_session.close()
         if answer[0]==201: #HTTP 201: CREATED
             response = {
                     'result': True,

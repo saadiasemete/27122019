@@ -3,5 +3,7 @@
     "CAPTCHA_LIFESPAN": 600,
     "SECRET_KEY": "admin",
     "TESTING": true,
-    "DEBUG": true
+    "DEBUG": true,
+    "UPLOAD_FOLDER": "uploads",
+    "ALLOWED_EXTENSIONS": ["jpg", "png", "jpeg"]
 }
