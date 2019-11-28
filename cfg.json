@@ -5,5 +5,6 @@
     "TESTING": true,
     "DEBUG": true,
     "UPLOAD_FOLDER": "uploads",
-    "ALLOWED_EXTENSIONS": ["jpg", "png", "jpeg"]
+    "ALLOWED_EXTENSIONS": ["jpg", "png", "jpeg"],
+    "DB_ENGINE": "sqlite:///here.db"
 }

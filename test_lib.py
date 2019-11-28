@@ -67,7 +67,6 @@ def launch_tests_01():
         print("%i: %s"%(answer.status_code, answer.text))
             
 
-
 launch_tests_01()
 
 

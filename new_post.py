@@ -45,6 +45,7 @@ class SubmitPost(query_processor.QueryProcessor):
     @classmethod
     def on_checks_passed(cls, data, db_session):
         """
+        TODO: permit autofill of board_id if to_thread is specified
         Assumes that the post is legit to be posted.
         """
         data = cls.apply_transformations(data, db_session)
