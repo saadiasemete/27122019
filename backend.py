@@ -64,10 +64,6 @@ def json_from_sqlalchemy_row(row):
     row.id #let sqlalchemy refresh the object
     return {i.name: row.__dict__.get(i.name) for i in row.__table__.columns}
 
-@current_app.teardown_appcontext
-def shutdown_session(exception=None):
-    db_session.remove()
-
 class StandardRequest(View):
     data_fetcher = get_data_mimetype_agnostic
     target_status = 200
@@ -89,6 +85,7 @@ class StandardRequest(View):
                     'result': False,
                     'data': answer[1],
                 }
+        db_session.remove()
         return jsonify(response), answer[0]
 
 class NewBoard(StandardRequest):
