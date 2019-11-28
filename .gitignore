@@ -3,6 +3,3 @@
 *.db
 notes.txt
 backend_client.py
-*.json
-.vscode/settings.json
-.vscode/settings.json
