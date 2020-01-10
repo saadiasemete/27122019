@@ -1,8 +1,7 @@
-from database import Board, Ban, Post, Captcha
+from ..database import Board, Ban, Post, Captcha
 import time
 from sqlalchemy import and_
-import post_checks
-import query_processor
+from . import post_checks, query_processor
 
 class SubmitPost(query_processor.QueryProcessor):
     checkers = [

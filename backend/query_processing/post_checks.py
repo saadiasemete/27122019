@@ -1,4 +1,4 @@
-from database import Board, Ban, Post, Captcha
+from ..database import Board, Ban, Post, Captcha
 import time
 from sqlalchemy import and_
 

@@ -1,5 +1,8 @@
-import current_timestamp
+from ..current_timestamp import current_timestamp
 class QueryProcessor():
+    """
+    TODO: post_checks should return data
+    """
 
     checkers = []
 
@@ -13,6 +16,7 @@ class QueryProcessor():
             if (i.get('condition') and i['condition'](data, db_session)) or not i.get('condition'):
                 err_status = i['checker'](data, db_session)
                 if err_status:
+                    print(err_status)
                     return err_status
-        data['timestamp'] = current_timestamp.current_timestamp()
+        data['timestamp'] = current_timestamp()
         return cls.on_checks_passed(data, db_session)

@@ -1,13 +1,16 @@
 from flask import Flask, request, jsonify, current_app
 from flask.views import View
-from new_post import SubmitPost
-from view_post import OpenPost
-from new_board import SubmitBoard
+from flask import Blueprint
+from .query_processing import SubmitBoard, SubmitPost, OpenPost
 from sqlalchemy import create_engine
-from database import meta
 import time
 
 from sqlalchemy.orm import sessionmaker, scoped_session
+
+app_blueprint = Blueprint(
+    "pyexaba_backend",
+    "backend_blueprint", #wtf is an import name?
+)
 
 def read_db_engine(config):
     """
@@ -15,27 +18,18 @@ def read_db_engine(config):
     """
     return config['DB_ENGINE']
 
-def generate_app(config_file = "cfg.json"):
-    app = Flask("pyexaba")
-    app.session_generator = sessionmaker()
-    app.config_file = config_file
-    app.config.from_json(current_app.config_file)
-    engine = create_engine(read_db_engine(app.config), echo=True)
-    if app.config['DEBUG']:
-        pass
-    else:
-        pass
-    if app.config['TESTING']:
-        meta.drop_all(engine)
-        meta.create_all(engine)
-    else:
-        pass
-    
-    return app
+
 
 #engine = create_engine('sqlite:///:memory:', echo=True)
 
 #db_session = scoped_session(sessionmaker(bind=engine))
+
+def simplify_imd(imd):
+    """
+    Werkzeug's IMD is a huge pain.
+    """
+    target_dict = imd.to_dict(flat = False)
+    return {i:(j[0] if len(j) == 1 else j) for i,j in target_dict.items()}
 
 def append_to_data(data):
     current_app.config.from_json(current_app.config_file) #include in a factory
@@ -54,9 +48,9 @@ def get_data_mimetype_agnostic():
     if request.is_json:
         result = request.json
     elif request.form:
-       result = request.form.to_dict()
+       result = simplify_imd(request.form)
     elif request.method == 'GET':
-        result = request.view_args if request.view_args else {}
+        result = simplify_imd(request.args) if request.args else {}
     return (append_to_data(result),)
 
 
@@ -72,10 +66,10 @@ class StandardRequest(View):
     def dispatch_request(self):
         data = self.__class__.data_fetcher()
         db_session = current_app.session_generator(
-            bind = create_engine(read_db_engine(current_app.config), echo=True)
+            bind = current_app.sql_engine
         )
         answer = self.__class__.query_processor.process(data[0], db_session)
-        if answer[0]==201: #HTTP 201: CREATED
+        if answer[0]==self.target_status:
             response = {
                     'result': True,
                     'data': self.__class__.answer_processor(answer[1]),
@@ -85,7 +79,7 @@ class StandardRequest(View):
                     'result': False,
                     'data': answer[1],
                 }
-        db_session.remove()
+        db_session.close()
         return jsonify(response), answer[0]
 
 class NewBoard(StandardRequest):
@@ -100,8 +94,9 @@ class ViewPost(StandardRequest):
     target_status = 200
     query_processor = OpenPost
 
-current_app.add_url_rule('/api/new_board', view_func = NewBoard.as_view('new_board'), methods = ['POST'])
-current_app.add_url_rule('/api/new_post', view_func = NewPost.as_view('new_post'), methods = ['POST'])
+app_blueprint.add_url_rule('/api/new_board', view_func = NewBoard.as_view('new_board'), methods = ['POST'])
+app_blueprint.add_url_rule('/api/new_post', view_func = NewPost.as_view('new_post'), methods = ['POST'])
+app_blueprint.add_url_rule('/api/view_post', view_func = ViewPost.as_view('view_post'), methods = ['GET'])
 
 #DELETE AFTER DEBUG
 
