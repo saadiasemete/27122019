@@ -7,7 +7,7 @@ def is_invalid_data(data, db_session):
     if not isinstance(data, dict): #should be a valid json dict
         return (400, "Unparseable data")
     
-    return None
+    return (None, None)
 
 def is_invalid_board_id(data, db_session):
     try:
@@ -15,7 +15,7 @@ def is_invalid_board_id(data, db_session):
         data['board_id'] = data['board_id'] #should be an integer
     except:
         return (404, "Invalid board_id")
-    return None
+    return (None, None)
 
 def is_thread(data, db_session):
     pass
@@ -27,7 +27,7 @@ def is_board_inexistent(data, db_session):
         return (404, "board_id does not exist")
     elif len(board_result)>1:
         return (500, "Ambiguous board_id")
-    return None
+    return (None, board_result)
 
 
 def is_board_address_existent(data, db_session):
@@ -37,17 +37,17 @@ def is_board_address_existent(data, db_session):
         return (403, "board_address exists")
     elif len(board_result)>1:
         return (500, "Ambiguous board_address")
-    return None
+    return (None, None)
 
 def is_thread_inexistent(data, db_session):
     if not data.get('to_thread'):
-        return None
+        return (None, 0)
     post_result = db_session.query(Post.id).filter(Post.id == data['to_thread']).all()
     if not len(post_result):
         return (404, "to_thread does not exist")
     elif len(post_result)>1:
         return (500, "Ambiguous to_thread")
-    return None
+    return (None, post_result)
 
 def is_banned(data, db_session):
     ban_result = db_session.query(Ban).filter(Ban.ip_address == data['ip_address'] )
@@ -57,18 +57,18 @@ def is_banned(data, db_session):
                 return (403, "Banned in the thread")
         if len(ban_result.filter(Ban.board_id == data['board_id']).all()):
             return (403, "Banned on the board")
-    return None
+    return (None, None)
 
 def is_board_rule_violated(data, db_session):
     board_result = db_session.query(Board).filter(Board.id == data['board_id'] ).first()
     if board_result.read_only:
         return  (403, "This board is read only")
-    return None
+    return (None, board_result)
 def is_thread_rule_violated(data, db_session):
     """
     Not implemented
     """
-    return False
+    return (False, None)
 
 def is_captcha_failed(data, db_session):
     #if cfg.captcha_on:
