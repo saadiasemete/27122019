@@ -73,11 +73,13 @@ class StandardRequest(View):
             response = {
                     'result': True,
                     'data': self.__class__.answer_processor(answer[1]),
+                    'info': None,
                 }
         else:
             response = {
                     'result': False,
                     'data': answer[1],
+                    'info': None if len(answer)==2 else answer[2], #for details on errors
                 }
         db_session.close()
         return jsonify(response), answer[0]
