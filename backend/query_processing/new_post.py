@@ -1,7 +1,8 @@
-from ..database import Board, Ban, Post, Captcha
+from ..database import Board, Ban, Post, Captcha, Attachment
 import time
 from sqlalchemy import and_
-from . import post_checks, query_processor
+from . import post_checks, query_processor, attachment_checks
+import os
 
 class SubmitPost(query_processor.QueryProcessor):
     checkers = [
@@ -29,6 +30,12 @@ class SubmitPost(query_processor.QueryProcessor):
             "checker": post_checks.is_board_rule_violated,
         },
         {
+            "checker": attachment_checks.is_ext_policy_nonconsistent,
+        },
+        {
+            "checker": attachment_checks.is_actual_image,
+        },
+        {
             "checker": post_checks.is_captcha_failed,
             "condition": lambda a,b: False,
         },
@@ -40,6 +47,32 @@ class SubmitPost(query_processor.QueryProcessor):
         In case the post needs to be changed before getting to the db.
         """
         return data
+    
+    @classmethod
+    def save_attachments(cls, data, post_id, db_session):
+        data['thumbnail']  = []
+        for i, j in data['__checkers__']['is_ext_policy_nonconsistent'].items():
+            if j['mediatype'] == 'picture':
+                file_to_save = data['__checkers__']['is_actual_image'][i]
+                file_to_save.thumbnail(data['__config__']['THUMBNAIL_SIZE']).save(
+                    os.path.join(os.curdir, data['__config__']['PATH']['THUMBNAIL']),
+                )
+                file_to_save.save(
+                    os.path.join(os.curdir, data['__config__']['PATH']['PICTURE']),
+                    format = j['extension'],
+                )
+            #TODO: other filetypes
+            #writing to the db agter saving to ensure it's actually here
+            new_attachment = Attachment(
+                mediatype = j['mediatype'],
+                extension = j['extension'],
+                post_id = post_id,
+            )
+            db_session.add(new_attachment)
+
+        for i in data['__checkers__']['is_actual_image']:
+            data['thumbnail'].append(i.thumbnail(data['__config__']['THUMBNAIL_SIZE']))
+        
     
     @classmethod
     def on_checks_passed(cls, data, db_session):
@@ -61,6 +94,8 @@ class SubmitPost(query_processor.QueryProcessor):
             timestamp = data['timestamp'],
         )
         db_session.add(new_post)
+        db_session.flush()
+        cls.save_attachments(data, new_post.id, db_session)
         if post_checks.is_thread(data, db_session):
             new_post.timestamp_last_bump = data['timestamp']
         else:

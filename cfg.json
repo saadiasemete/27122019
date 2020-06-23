@@ -5,7 +5,18 @@
     "TESTING": true,
     "DEBUG": true,
     "UPLOAD_FOLDER": "uploads",
-    "ALLOWED_EXTENSIONS": ["jpg", "png", "jpeg"],
+    "ALLOWED_EXTENSIONS": 
+    {
+        "picture": ["jpg", "png", "jpeg"],
+        "sound": ["mp3"]
+    },
+    "PATH":{
+        "__PREFIX__": "/media",
+        "THUMBNAIL": "/thumbnail",
+        "PICTURE": "/picture",
+        "SOUND": "/sound",
+        "VIDEO": "/video"
+    },
     "DB_ENGINE": "sqlite:///here.db",
     "THUMBNAIL_SIZE": 200
 }

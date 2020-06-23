@@ -10,11 +10,19 @@ Policy: on error reject all. Frontend should save the settings beforehand.
 warnings.simplefilter('error', PIL.Image.DecompressionBombWarning)
 
 def is_ext_policy_nonconsistent(data, db_session):
+    def check_extension(ext):
+        for i in ['picture', 'sound', 'video']:
+            if ext in data['__config__']['ALLOWED_EXTENSIONS'].get(i, []):
+                return (i, True)
+        return (None, False)
+
     errors, extensions = [], {}
     for i, j in data['__files__'].values():
         #check if the extension is not in allowed
-        extensions[i] = j.filename.rpartition('.')[-1]
-        if extensions[i] not in data['__config__']['ALLOWED_EXTENSIONS']:
+        extensions[i] = {"extension": j.filename.rpartition('.')[-1]}
+        check_result = check_extension(extensions[i])
+        extensions[i]['mediatype'] = check_result[0]
+        if not check_result[1]:
             errors.append(str(i))
     if not errors:
         return (None, extensions)

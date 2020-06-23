@@ -108,3 +108,14 @@ class Captcha(Base):
     ip_address = Column(String(16), nullable=False)
 
     timestamp = Column(DateTime, nullable=False) #nullified => captcha is eternal
+
+class Attachment(Base):
+    """
+    The idea is: every filetype will be stored in its own folder under the name id
+    """
+    __tablename__ = "attachment"
+    metadata = meta 
+    id = Column(Integer, primary_key = True)
+    mediatype = Column(String(16), nullable = False)
+    extension = Column(String(16), nullable = False)
+    post_id = Column(Integer, ForeignKey('post.id'), nullable = False)
