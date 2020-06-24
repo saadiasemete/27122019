@@ -1,13 +1,13 @@
 from ..database import Board, Ban, Post, Captcha
 import time
 from sqlalchemy import and_
-import PIL
+from PIL import Image as PIL_Image
 import warnings
 """
 Policy: on error reject all. Frontend should save the settings beforehand.
 """
 
-warnings.simplefilter('error', PIL.Image.DecompressionBombWarning)
+warnings.simplefilter('error', PIL_Image.DecompressionBombWarning)
 
 def is_ext_policy_nonconsistent(data, db_session):
     def check_extension(ext):
@@ -35,10 +35,10 @@ def is_actual_image(data, db_session):
     for i, j in data['__files__'].values():
         #every error should be logged so
         try:
-            images[i] = PIL.Image.open(j.stream)
+            images[i] = PIL_Image.open(j.stream)
         except IOError:
             errors.append("Unsupported format: %s"%str(i))
-        except PIL.Image.DecompressionBombWarning:
+        except PIL_Image.DecompressionBombWarning:
             errors.append("Decompression bomb?: %s"%str(i))
     if not errors:
         return (None, images)
