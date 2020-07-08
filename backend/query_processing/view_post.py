@@ -21,7 +21,7 @@ class OpenPost(query_processor.QueryProcessor):
         """
         For now - let us open a single post, then will see.
         """
-        fetched_post = db_session.query(Post).filter(Post.id == data['post_id']).first()
+        fetched_post = db_session.query(Post).filter(Post.id == data['__data__']['post_id']).first()
         if fetched_post:
             return (200, fetched_post)
         else:

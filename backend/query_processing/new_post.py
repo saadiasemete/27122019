@@ -46,7 +46,7 @@ class SubmitPost(query_processor.QueryProcessor):
         """
         In case the post needs to be changed before getting to the db.
         """
-        data['sage'] = cls.convert_misrepresented_booleans(data['sage'])
+        data['__data__']['sage'] = cls.convert_misrepresented_booleans(data['__data__']['sage'])
         return data
     
     @classmethod
@@ -102,22 +102,22 @@ class SubmitPost(query_processor.QueryProcessor):
         """
         data = cls.apply_transformations(data, db_session)
         new_post = Post(
-            board_id = data['board_id'],
-            to_thread = data.get('to_thread'),
-            reply_to = data.get('reply_to'),
-            ip_address = data['ip_address'],
-            title = data.get('title'),
-            text  = data.get('text'),
-            #tripcode = data.get('tripcode'),
-            #password = data.get('password'),
-            sage = bool(data.get('sage')),
-            timestamp = data['timestamp'],
+            board_id = data['__data__']['board_id'],
+            to_thread = data['__data__'].get('to_thread'),
+            reply_to = data['__data__'].get('reply_to'),
+            ip_address = data['__data__']['ip_address'],
+            title = data['__data__'].get('title'),
+            text  = data['__data__'].get('text'),
+            #tripcode = data['__data__'].get('tripcode'),
+            #password = data['__data__'].get('password'),
+            sage = bool(data['__data__'].get('sage')),
+            timestamp = data['__data__']['timestamp'],
         )
         db_session.add(new_post)
         db_session.flush()
         cls.save_attachments(data, new_post.id, db_session)
         if post_checks.is_thread(data, db_session):
-            new_post.timestamp_last_bump = data['timestamp']
+            new_post.timestamp_last_bump = data['__data__']['timestamp']
         else:
             if not data.get('sage'):
                 db_session.query(Post).filter(Post.id == data['to_thread']).first().timestamp_last_bump = data['timestamp'] 

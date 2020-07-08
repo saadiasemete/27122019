@@ -37,7 +37,7 @@ def append_to_data(data):
     data['__config__'] = current_app.config
     data['__files__'] = request.files
     print(data['__files__'])
-    data['ip_address'] = request.remote_addr
+    data['__data__']['ip_address'] = request.remote_addr
     return data
 
 def get_data_mimetype_agnostic():
@@ -52,7 +52,8 @@ def get_data_mimetype_agnostic():
        result = simplify_imd(request.form)
     elif request.method == 'GET':
         result = simplify_imd(request.args) if request.args else {}
-    return (append_to_data(result),)
+    wrapper = {'__data__': result}
+    return (append_to_data(wrapper),)
 
 
 def json_from_sqlalchemy_row(row):

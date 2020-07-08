@@ -28,13 +28,13 @@ class SubmitBoard(query_processor.QueryProcessor):
         """
         data = cls.apply_transformations(data, db_session)
         new_board = Board(
-            name = data['name'],
-            address = data['address'],
-            description = data.get('description'),
-            created_at = data['timestamp'],
-            hidden = data.get('hidden'),
-            admin_only = data.get('admin_only'),
-            read_only = data.get('read_only'),
+            name = data['__data__']['name'],
+            address = data['__data__']['address'],
+            description = data['__data__'].get('description'),
+            created_at = data['__data__']['timestamp'],
+            hidden = data['__data__'].get('hidden'),
+            admin_only = data['__data__'].get('admin_only'),
+            read_only = data['__data__'].get('read_only'),
         )
         db_session.add(new_board)
         db_session.commit()

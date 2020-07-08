@@ -24,5 +24,5 @@ class QueryProcessor():
                     return check_result
                 else:
                     data['__checkers__'][i['checker'].__name__] = check_result[1]
-        data['timestamp'] = current_timestamp()
+        data['__data__']['timestamp'] = current_timestamp()
         return cls.on_checks_passed(data, db_session)

@@ -12,13 +12,13 @@ def create_board(
 ):
     print(" here goes nothing ")
     a = SubmitBoard.process(
-        data = {
+        data = {'__data__':{
             'name': name,
             'description': description,
             'address': address,
             'timestamp': int(time.time()),
 
-        },
+        }},
         db_session = app.session_generator(
             #bind = create_engine(read_db_engine(app.config), echo=True)
             
