@@ -69,7 +69,9 @@ def is_banned(data, db_session):
 def is_board_rule_violated(data, db_session):
     board_result = db_session.query(Board).filter(Board.id == data['board_id'] ).first()
     if board_result.read_only:
-        return  (403, "This board is read only")
+        return  (403, "This board is read only") 
+    if board_result.thread_requires_attachment and not data['__files__']:
+        return  (403, "Attachment required") 
     return (None, board_result)
 def is_thread_rule_violated(data, db_session):
     """

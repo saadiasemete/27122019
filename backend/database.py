@@ -21,6 +21,7 @@ class Board(Base):
     hidden = Column(Boolean, default=False)
     admin_only = Column(Boolean, default=False)
     read_only = Column(Boolean, default=False)
+    thread_requires_attachment = Column(Boolean, default=True)
     
 class Post(Base):
     __tablename__ = "post"
