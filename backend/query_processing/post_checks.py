@@ -12,14 +12,17 @@ def is_invalid_data(data, db_session):
 def is_invalid_board_id(data, db_session):
     try:
         assert data['board_id'] #should be not null
-        data['board_id'] = data['board_id'] #should be an integer
+        data['board_id'] = int(data['board_id']) #should be an integer
     except:
         return (404, "Invalid board_id")
     return (None, None)
 
 def is_thread(data, db_session):
-    pass
-    return not data.get('to_thread')
+    to_thread = data.get('to_thread')
+    return not is_digit(to_thread) or not int(to_thread)
+
+def is_digit(value):
+    return isinstance(value, int) or isinstance(value, str) and value.isdigit()
 
 def is_board_inexistent(data, db_session):
     board_result = db_session.query(Board.id).filter(Board.id == data['board_id']).all()
@@ -31,7 +34,10 @@ def is_board_inexistent(data, db_session):
 
 
 def is_board_address_existent(data, db_session):
-    board_address = data.get('board_address', data['address']) #for API clients convenience
+    try:
+        board_address = data.get('board_address', data['address']) #for API clients convenience
+    except:
+        return (400, "board_address not included")
     board_result = db_session.query(Board.address).filter(Board.address == board_address).all()
     if len(board_result)==1:
         return (403, "board_address exists")
@@ -42,6 +48,7 @@ def is_board_address_existent(data, db_session):
 def is_thread_inexistent(data, db_session):
     if not data.get('to_thread'):
         return (None, 0)
+    
     post_result = db_session.query(Post.id).filter(Post.id == data['to_thread']).all()
     if not len(post_result):
         return (404, "to_thread does not exist")

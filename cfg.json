@@ -18,5 +18,5 @@
         "VIDEO": "/video"
     },
     "DB_ENGINE": "sqlite:///here.db",
-    "THUMBNAIL_SIZE": 200
+    "THUMBNAIL_SIZE": [200,200]
 }

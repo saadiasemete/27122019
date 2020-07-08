@@ -3,6 +3,11 @@ class QueryProcessor():
 
     checkers = []
 
+    @staticmethod
+    def convert_misrepresented_booleans(value):
+        if isinstance(value, str):
+            return value.lower() in ["true", "1"]
+
     @classmethod
     def on_checks_passed(cls, data, db_session):
         raise NotImplementedError

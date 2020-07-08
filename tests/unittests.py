@@ -2,7 +2,7 @@ import unittest
 #from backend_client import Client as test_client
 from ..backend.app import generate_app
 import json
-from .qa_utilities import create_board
+from .qa_utilities import create_board, prepare_image
 import os
 import requests
 
@@ -52,15 +52,18 @@ class CreateNewThreadNoTripCyrillic(PostingAndViewing):
         STOP. You should be able to get the post_id from the request. Do it.
         """
         ThisData = self.OwnDataset['CreateNewThreadNoTripCyrillic']
+        image = prepare_image()
+        #with open("image_data.txt", "wb") as f:
+            #f.write(image)
         #let's see how it works
-        post_result = self.TestClient.post(NEW_POST, json = ThisData).json()
+        post_request = self.TestClient.post(NEW_POST, data = ThisData, files = {'file': image})
+        post_result = post_request.json()
         post_viewed = self.TestClient.get(VIEW_POST, params = {"post_id":post_result['data']['id']}).json()
         #checking if it exists at all
         self.assertTrue(post_viewed['result'], "No post detected")
         #checking that no data is lost during conversion
         for i in [
             'board_id',
-            'to_thread',
             'reply_to',
             'title',
             'text',

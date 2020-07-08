@@ -36,6 +36,7 @@ def append_to_data(data):
     data['__headers__'] = request.headers
     data['__config__'] = current_app.config
     data['__files__'] = request.files
+    print(data['__files__'])
     data['ip_address'] = request.remote_addr
     return data
 
@@ -59,11 +60,13 @@ def json_from_sqlalchemy_row(row):
     return {i.name: row.__dict__.get(i.name) for i in row.__table__.columns}
 
 class StandardRequest(View):
+    
     data_fetcher = get_data_mimetype_agnostic
     target_status = 200
     query_processor = NotImplemented
     answer_processor = json_from_sqlalchemy_row
     def dispatch_request(self):
+        
         data = self.__class__.data_fetcher()
         db_session = current_app.session_generator(
             bind = current_app.sql_engine

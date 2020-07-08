@@ -46,32 +46,52 @@ class SubmitPost(query_processor.QueryProcessor):
         """
         In case the post needs to be changed before getting to the db.
         """
+        data['sage'] = cls.convert_misrepresented_booleans(data['sage'])
         return data
     
     @classmethod
     def save_attachments(cls, data, post_id, db_session):
+        def generate_path(filetype, filename, fileformat):
+            return ".".join(
+               [ os.path.join(
+                os.getcwd(),
+                data['__config__']['PATH']['__PREFIX__'],
+                data['__config__']['PATH'][filetype],
+                filename
+            ),
+            fileformat
+            ]
+            )
+            
+
         data['thumbnail']  = []
+        
         for i, j in data['__checkers__']['is_ext_policy_nonconsistent'].items():
             if j['mediatype'] == 'picture':
                 file_to_save = data['__checkers__']['is_actual_image'][i]
-                file_to_save.thumbnail(data['__config__']['THUMBNAIL_SIZE']).save(
-                    os.path.join(os.curdir, data['__config__']['PATH']['THUMBNAIL']),
+                thumbnail = file_to_save.copy()
+                thumbnail.thumbnail(data['__config__']['THUMBNAIL_SIZE'])
+                #how do we tell the id otherwise
+                new_attachment = Attachment(
+                        mediatype = j['mediatype'],
+                        extension = j['extension'],
+                        post_id = post_id,
+                    )
+                db_session.add(new_attachment)
+                db_session.flush()
+                thumbnail.save(
+                    generate_path("THUMBNAIL", str(new_attachment.id),j['extension']),
+                    format = j['extension'],
                 )
                 file_to_save.save(
-                    os.path.join(os.curdir, data['__config__']['PATH']['PICTURE']),
+                    generate_path("PICTURE", str(new_attachment.id),j['extension']),
                     format = j['extension'],
                 )
             #TODO: other filetypes
-            #writing to the db agter saving to ensure it's actually here
-            new_attachment = Attachment(
-                mediatype = j['mediatype'],
-                extension = j['extension'],
-                post_id = post_id,
-            )
-            db_session.add(new_attachment)
+            
 
-        for i in data['__checkers__']['is_actual_image']:
-            data['thumbnail'].append(i.thumbnail(data['__config__']['THUMBNAIL_SIZE']))
+        for i, j in data['__checkers__']['is_actual_image'].items():
+            data['thumbnail'].append(j.thumbnail(data['__config__']['THUMBNAIL_SIZE']))
         
     
     @classmethod
@@ -100,6 +120,6 @@ class SubmitPost(query_processor.QueryProcessor):
             new_post.timestamp_last_bump = data['timestamp']
         else:
             if not data.get('sage'):
-                db_session.query(Post).filter(Post.id == data['reply_to']).first().timestamp_last_bump = data['timestamp'] 
+                db_session.query(Post).filter(Post.id == data['to_thread']).first().timestamp_last_bump = data['timestamp'] 
         db_session.commit()
         return (201, new_post)

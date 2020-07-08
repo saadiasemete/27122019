@@ -2,10 +2,9 @@
     "PostingAndViewing": {
         "CreateNewThreadNoTripCyrillic": {
             "board_id": 1,
-            "to_thread": 0,
             "reply_to": null,
             "title": "test thread",
-            "text": "Создаем тестовый тред (пока без картинки)",
+            "text": "Создаем тестовый тред (теперь и с картинкой)",
             "tripcode": null,
             "sage": false
         },
@@ -14,9 +13,9 @@
             "to_thread": 1,
             "reply_to": null,
             "title": "test thread",
-            "text": "Создаем тестовый тред (пока без картинки)",
+            "text": "Создаем тестовый тред (без картинки)",
             "tripcode": null,
             "sage": false
         }
-    }
+}
 }
