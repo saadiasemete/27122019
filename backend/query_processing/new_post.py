@@ -100,11 +100,12 @@ class SubmitPost(query_processor.QueryProcessor):
         TODO: permit autofill of board_id if to_thread is specified
         Assumes that the post is legit to be posted.
         """
+        is_thread = post_checks.is_thread(data, db_session)
         data = cls.apply_transformations(data, db_session)
         new_post = Post(
             board_id = data['__data__']['board_id'],
             to_thread = data['__data__'].get('to_thread'),
-            reply_to = data['__data__'].get('reply_to'),
+            reply_to = data['__data__'].get('reply_to') if not is_thread else None,
             ip_address = data['__data__']['ip_address'],
             title = data['__data__'].get('title'),
             text  = data['__data__'].get('text'),

@@ -43,8 +43,8 @@ def is_actual_image(data, db_session):
     for i, j in data['__files__'].items():
         #every error should be logged so
         #try:
-        stream_read = j.stream
-        images[i] = PIL_Image.open(stream_read)
+
+        images[i] = PIL_Image.open(j.stream)
         pass
         #except IOError:
             #errors.append("Unsupported format: %s"%str(i))

@@ -31,11 +31,15 @@ def simplify_imd(imd):
     target_dict = imd.to_dict(flat = False)
     return {i:(j[0] if len(j) == 1 else j) for i,j in target_dict.items()}
 
+def expand_filelist(files):
+    return {str(i): j for i,j in enumerate(files.getlist('files'))}
+
+
 def append_to_data(data):
     current_app.config.from_json(current_app.config_file) #include in a factory
     data['__headers__'] = request.headers
     data['__config__'] = current_app.config
-    data['__files__'] = request.files
+    data['__files__'] = expand_filelist(request.files)
     print(data['__files__'])
     data['__data__']['ip_address'] = request.remote_addr
     return data

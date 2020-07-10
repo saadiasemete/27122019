@@ -5,6 +5,7 @@ import json
 from .qa_utilities import create_board, prepare_image
 import os
 import requests
+import io
 
 class custom_test_client():
     """
@@ -38,9 +39,10 @@ class PostingAndViewing(unittest.TestCase):
     """
     def setUp(self):
         self.FlaskApp = generate_app("testing_cfg.json")
-        self.FlaskApp.run(debug = self.FlaskApp.config['DEBUG'])
-        #self.TestClient = self.FlaskApp.test_client()
-        self.TestClient = custom_test_client("localhost", 5000)
+        #self.FlaskApp.run(debug = self.FlaskApp.config['DEBUG'])
+        self.TestClient = self.FlaskApp.test_client()
+        #we don't know how to include files in it
+        #self.TestClient = custom_test_client("localhost", 5000)
         create_board(self.FlaskApp)
         unittests_dataset_path = os.path.join('pyexaba', 'tests', 'unittests_dataset.json')
         self.OwnDataset = json.load(open(unittests_dataset_path, encoding="utf-8"), encoding="utf-8")['PostingAndViewing']
@@ -56,9 +58,15 @@ class CreateNewThreadNoTripCyrillic(PostingAndViewing):
         #with open("image_data.txt", "wb") as f:
             #f.write(image)
         #let's see how it works
-        post_request = self.TestClient.post(NEW_POST, data = ThisData, files = {'file': image})
-        post_result = post_request.json()
-        post_viewed = self.TestClient.get(VIEW_POST, params = {"post_id":post_result['data']['id']}).json()
+        #post_request = self.TestClient.post(NEW_POST, data = ThisData, files = {'file': image})
+        ThisData['files'] = [
+            (prepare_image(), 'file1.jpg'),
+            (prepare_image(), 'file2.jpg'),
+        ]
+        post_request = self.TestClient.post(NEW_POST, data = ThisData)
+        post_result = post_request.json
+        self.assertTrue(post_result['result'], post_result['data'])
+        post_viewed = self.TestClient.get(VIEW_POST, query_string = {"post_id":post_result['data']['id']}).json
         #checking if it exists at all
         self.assertTrue(post_viewed['result'], "No post detected")
         #checking that no data is lost during conversion
