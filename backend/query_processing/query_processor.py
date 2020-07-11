@@ -13,9 +13,11 @@ class QueryProcessor():
         raise NotImplementedError
 
     @classmethod
-    def process(cls, data, db_session):
+    def process(cls, data, db_session, testing_mode = False):
         data.setdefault('__checkers__', {})
         for i in cls.checkers:
+            if testing_mode:
+                break
             if (i.get('condition') and i['condition'](data, db_session)) or not i.get('condition'):
                 check_result = i['checker'](data, db_session)
                 print(i['checker'].__name__)

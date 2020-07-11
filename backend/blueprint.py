@@ -3,6 +3,7 @@ from flask.views import View
 from flask import Blueprint
 from .query_processing import SubmitBoard, SubmitPost, OpenPost
 from sqlalchemy import create_engine
+from sqlalchemy.sql import sqltypes
 import time
 
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -59,10 +60,18 @@ def get_data_mimetype_agnostic():
     wrapper = {'__data__': result}
     return (append_to_data(wrapper),)
 
+def preprocess_sqlalchemy_values(column, value):
+    if type(column.type) == sqltypes.DateTime and value:
+        return value.isoformat()
+    return value
+
 
 def json_from_sqlalchemy_row(row):
     row.id #let sqlalchemy refresh the object
-    return {i.name: row.__dict__.get(i.name) for i in row.__table__.columns}
+    result = {}
+    for i in row.__table__.columns:
+        result[i.name] = preprocess_sqlalchemy_values(i, row.__dict__.get(i.name))
+    return result
 
 class StandardRequest(View):
     

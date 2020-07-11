@@ -70,7 +70,7 @@ def is_board_rule_violated(data, db_session):
     board_result = db_session.query(Board).filter(Board.id == data['__data__']['board_id'] ).first()
     if board_result.read_only:
         return  (403, "This board is read only") 
-    if board_result.thread_requires_attachment and not data['__files__']:
+    if is_thread(data, db_session) and board_result.thread_requires_attachment and not data.get('__files__'):
         return  (403, "Attachment required") 
     return (None, board_result)
 def is_thread_rule_violated(data, db_session):

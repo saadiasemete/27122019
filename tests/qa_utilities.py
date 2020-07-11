@@ -1,4 +1,4 @@
-from ..backend.query_processing import SubmitBoard
+from ..backend.query_processing import SubmitBoard, SubmitPost
 import time, os
 from sqlalchemy import create_engine
 from ..backend.blueprint import read_db_engine
@@ -16,7 +16,7 @@ def create_board(
             'name': name,
             'description': description,
             'address': address,
-            'timestamp': int(time.time()),
+
 
         }},
         db_session = app.session_generator(
@@ -24,6 +24,36 @@ def create_board(
             
             bind = app.sql_engine
         )
+    )
+    print(a)
+
+def create_thread(
+    app,
+    title = 'test_thread',
+    text = 'test_text',
+    board_id = 1,
+    ip_address = "127.0.0.1",
+):
+    """
+    Note that this function circumvents attachments rules.
+    """
+    print(" here goes nothing ")
+    a = SubmitPost.process(
+        data = {'__data__':{
+            'board_id': board_id,
+            'reply_to': None,
+            'title': title,
+            'text': text,
+            
+            'ip_address': "127.0.0.1",
+
+        }},
+        db_session = app.session_generator(
+            #bind = create_engine(read_db_engine(app.config), echo=True)
+            
+            bind = app.sql_engine
+        ),
+        testing_mode=True
     )
     print(a)
 

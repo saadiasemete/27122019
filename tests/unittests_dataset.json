@@ -8,12 +8,10 @@
             "tripcode": null,
             "sage": false
         },
-        "CheckThreadBump":{
-            "board_id": 1,
-            "to_thread": 1,
+        "GenericPost":{
             "reply_to": null,
-            "title": "test thread",
-            "text": "Создаем тестовый тред (без картинки)",
+            "title": "test post",
+            "text": "Создаем тестовый пост",
             "tripcode": null,
             "sage": false
         }
