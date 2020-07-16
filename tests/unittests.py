@@ -15,6 +15,27 @@ class PostingAndViewing(unittest.TestCase):
     """
     Base for tests intended for posting and viewing
     """
+    def create_thread_unsafe(self):
+        """
+        Is not guaranteed to be created
+        if the standard thread creation
+        has fallen
+        """
+        ThisData = {
+            "board_id": 1,
+            "reply_to": None,
+            "title": "test thread",
+            "text": "Создаем тестовый тред (теперь и с картинкой)",
+            "tripcode": None,
+            "sage": False
+        },
+        ThisData['files'] = [
+            (prepare_image(), 'file1.jpg'),
+            (prepare_image(), 'file2.jpg'),
+        ]
+        self.TestClient.post(NEW_POST, data = ThisData)
+
+
     def setUp(self):
         self.FlaskApp = generate_app("testing_cfg.json")
         self.TestClient = self.FlaskApp.test_client()
