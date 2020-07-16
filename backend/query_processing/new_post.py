@@ -1,8 +1,9 @@
 from ..database import Board, Ban, Post, Captcha, Attachment
 import time
 from sqlalchemy import and_
-from . import post_checks, query_processor, attachment_checks
+from . import post_checks, query_processor, attachment_checks, utils
 import os
+import string, random
 
 class SubmitPost(query_processor.QueryProcessor):
     checkers = [
@@ -52,17 +53,27 @@ class SubmitPost(query_processor.QueryProcessor):
     @classmethod
     def save_attachments(cls, data, post_id, db_session):
         def generate_path(filetype, filename, fileformat):
-            return ".".join(
-               [ os.path.join(
-                os.getcwd(),
+            return utils.generate_path_to_attachment(
+                filetype, filename, fileformat,
                 data['__config__']['PATH']['__PREFIX__'],
                 data['__config__']['PATH'][filetype],
-                filename
-            ),
-            fileformat
-            ]
             )
+        def generate_filename(length = 16):
+            return "".join([random.choice("".join([string.ascii_letters, string.digits])) for i in range(length)])
             
+        def append_file_to_database(mediatype, extension):
+            string_generated = generate_filename()
+            if db_session.query(Attachment).filter(Attachment.filename == string_generated):
+                string_generated = generate_filename() #the probability it repeats second time is negligible
+            new_attachment = Attachment(
+                    mediatype = mediatype,
+                    extension = extension,
+                    post_id = post_id,
+                    filename = string_generated,
+                )
+            db_session.add(new_attachment)
+            return string_generated
+
 
         data['thumbnail']  = []
         
@@ -71,20 +82,13 @@ class SubmitPost(query_processor.QueryProcessor):
                 file_to_save = data['__checkers__']['is_actual_image'][i]
                 thumbnail = file_to_save.copy()
                 thumbnail.thumbnail(data['__config__']['THUMBNAIL_SIZE'])
-                #how do we tell the id otherwise
-                new_attachment = Attachment(
-                        mediatype = j['mediatype'],
-                        extension = j['extension'],
-                        post_id = post_id,
-                    )
-                db_session.add(new_attachment)
-                db_session.flush()
+                attachment_filename = append_file_to_database(j['mediatype'], j['extension'])
                 thumbnail.save(
-                    generate_path("THUMBNAIL", str(new_attachment.id),j['extension']),
+                    generate_path("THUMBNAIL", attachment_filename,j['extension']),
                     format = j['extension'],
                 )
                 file_to_save.save(
-                    generate_path("PICTURE", str(new_attachment.id),j['extension']),
+                    generate_path("PICTURE", attachment_filename,j['extension']),
                     format = j['extension'],
                 )
             #TODO: other filetypes
@@ -117,6 +121,7 @@ class SubmitPost(query_processor.QueryProcessor):
         db_session.add(new_post)
         db_session.flush()
         cls.save_attachments(data, new_post.id, db_session)
+        db_session.flush()
         if post_checks.is_thread(data, db_session):
             new_post.timestamp_last_bump = data['__data__']['timestamp']
         else:

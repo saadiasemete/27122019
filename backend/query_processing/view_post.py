@@ -1,4 +1,4 @@
-from ..database import Board, Ban, Post, Captcha
+from ..database import Board, Ban, Post, Captcha, Attachment
 import time
 from sqlalchemy import and_
 from . import post_checks, query_processor
@@ -21,7 +21,16 @@ class OpenPost(query_processor.QueryProcessor):
         """
         For now - let us open a single post, then will see.
         """
-        fetched_post = db_session.query(Post).filter(Post.id == data['__data__']['post_id']).first()
+        #fetched_post = db_session.query(Post, Attachment).filter(Post.id == data['__data__']['post_id'])\
+        #    .outerjoin(Attachment).all()
+        
+        fetched_post = db_session.query(Post).outerjoin(Attachment)\
+        .filter(Post.id == data['__data__']['post_id']).all()
+        
+
+
+        #fetched_post = db_session.query(Post, Attachment).filter(Post.id == data['__data__']['post_id'])\
+        #    .filter(Attachment.post_id == Post.id).all()
         if fetched_post:
             return (200, fetched_post)
         else:

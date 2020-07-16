@@ -26,11 +26,11 @@ class Board(Base):
 class Post(Base):
     __tablename__ = "post"
     metadata = meta
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, index = True)
 
     #number_in_thread = Column(Integer, nullable=False)
 
-    board_id = Column(Integer, ForeignKey('tripcode.id'), nullable = False)
+    board_id = Column(Integer, ForeignKey('board.id'), nullable = False, index = True)
 
     reply_to = Column(Integer)
 
@@ -39,7 +39,7 @@ class Post(Base):
     title = Column(String(70))
     text = Column(String(8192))
 
-    tripcode_id = Column(Integer, ForeignKey('tripcode.id')) #foreign key, actually - also nullable
+    tripcode_id = Column(Integer, ForeignKey('tripcode.id'), index = True)
     
     password_hash = Column(String(128))
 
@@ -47,7 +47,9 @@ class Post(Base):
     sage = Column(Boolean)
 
     timestamp = Column(DateTime, nullable=False)
-    timestamp_last_bump = Column(DateTime) #i just thought it would be too resource-consuming to compute it every time otherwise
+    timestamp_last_bump = Column(DateTime, index = True) #i just thought it would be too resource-consuming to compute it every time otherwise
+
+    attachments = relationship("Attachment", backref="post")
 
     #https://dev.to/kaelscion/authentication-hashing-in-sqlalchemy-1bem
 
@@ -117,6 +119,7 @@ class Attachment(Base):
     __tablename__ = "attachment"
     metadata = meta 
     id = Column(Integer, primary_key = True)
+    filename = Column(String(16), unique = True, index = True)
     mediatype = Column(String(16), nullable = False)
     extension = Column(String(16), nullable = False)
-    post_id = Column(Integer, ForeignKey('post.id'), nullable = False)
+    post_id = Column(Integer, ForeignKey('post.id'), nullable = False, index = True)

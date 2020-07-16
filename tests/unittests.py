@@ -47,12 +47,17 @@ class CreateNewThreadNoTripCyrillic(PostingAndViewing):
             'text',
             'sage'
             ]:
-            self.assertEqual(post_viewed['data'][i], ThisData[i], "%s doesn't match"%i)
+            self.assertEqual(post_viewed['data'][0][i], ThisData[i], "%s doesn't match"%i)
+        self.assertEqual(
+            len(post_viewed['data'][0]['attachments']),
+            len(ThisData['files']),
+            "Different attachment quantity"
+        )
         #checking if there is any timestamp
-        self.assertTrue(post_viewed['data']['timestamp'])
+        self.assertTrue(post_viewed['data'][0]['timestamp'])
         #making sure the thread is bumped by its own creation
-        self.assertEqual(post_viewed['data']['timestamp'], 
-                        post_viewed['data']['timestamp_last_bump'], 
+        self.assertEqual(post_viewed['data'][0]['timestamp'], 
+                        post_viewed['data'][0]['timestamp_last_bump'], 
                         "The thread has been created but not self-bumped")
 
 class CreateThreadWithNoImage(PostingAndViewing):
@@ -72,7 +77,15 @@ class CreateThreadWithNoImage(PostingAndViewing):
 
 class PostingInThreadNoImage(PostingAndViewing):
     def runTest(self):
-        create_thread(self.FlaskApp)
+        #create_thread(self.FlaskApp)
+
+        ThisData = self.OwnDataset['CreateNewThreadNoTripCyrillic']
+        ThisData['files'] = [
+            (prepare_image(), 'file1.jpg'),
+            (prepare_image(), 'file2.jpg'),
+        ]
+        self.TestClient.post(NEW_POST, data = ThisData)
+
         ThisData = self.OwnDataset['GenericPost']
         ThisData['board_id'] = ThisData['to_thread'] = 1
         post_request = self.TestClient.post(NEW_POST, data = ThisData)
@@ -80,7 +93,7 @@ class PostingInThreadNoImage(PostingAndViewing):
         self.assertTrue(post_result['result'], post_result['data'])
         post_viewed = self.TestClient.get(VIEW_POST, query_string = {"post_id":post_result['data']['id']}).json
         #checking if there is any timestamp
-        self.assertTrue(post_viewed['data']['timestamp'])
+        self.assertTrue(post_viewed['data'][0]['timestamp'])
         for i in [
             'board_id',
             'reply_to',
@@ -88,7 +101,7 @@ class PostingInThreadNoImage(PostingAndViewing):
             'text',
             'sage'
         ]:
-            self.assertEqual(post_viewed['data'][i], ThisData[i], "%s doesn't match"%i)
+            self.assertEqual(post_viewed['data'][0][i], ThisData[i], "%s doesn't match"%i)
         
 
 class ThreadBump(PostingAndViewing):
@@ -98,8 +111,8 @@ class ThreadBump(PostingAndViewing):
         ThisData['board_id'] = ThisData['to_thread'] = 1
         post_request = self.TestClient.post(NEW_POST, data = ThisData)
         post_viewed = self.TestClient.get(VIEW_POST, query_string = {"post_id":1}).json
-        self.assertNotEqual(post_viewed['data']['timestamp'], 
-                        post_viewed['data']['timestamp_last_bump'], 
+        self.assertNotEqual(post_viewed['data'][0]['timestamp'], 
+                        post_viewed['data'][0]['timestamp_last_bump'], 
                         "Bump failed")
 
 class ThreadSage(PostingAndViewing):
@@ -110,6 +123,6 @@ class ThreadSage(PostingAndViewing):
         ThisData['sage'] = True
         post_request = self.TestClient.post(NEW_POST, data = ThisData)
         post_viewed = self.TestClient.get(VIEW_POST, query_string = {"post_id":1}).json
-        self.assertEqual(post_viewed['data']['timestamp'], 
-                        post_viewed['data']['timestamp_last_bump'], 
+        self.assertEqual(post_viewed['data'][0]['timestamp'], 
+                        post_viewed['data'][0]['timestamp_last_bump'], 
                         "Sage failed")
