@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, current_app, send_from_directory
 from flask.views import View
 from flask import Blueprint
-from .query_processing import SubmitBoard, SubmitPost, OpenPost
+from .query_processing import SubmitBoard, SubmitPost, OpenPost, ThreadListing, PostListing
 from .query_processing import utils as query_utils
 from sqlalchemy import create_engine
 from sqlalchemy.sql import sqltypes
@@ -172,9 +172,21 @@ class ViewPost(StandardRequest):
     query_processor = OpenPost
     answer_processor = unf_list
 
+class ListThreads(StandardRequest):
+    target_status = 200
+    query_processor = ThreadListing
+    answer_processor = unf_list
+
+class ViewUnistream(StandardRequest):
+    target_status = 200
+    query_processor = PostListing
+    answer_processor = unf_list
+
 app_blueprint.add_url_rule('/api/new_board', view_func = NewBoard.as_view('new_board'), methods = ['POST'])
 app_blueprint.add_url_rule('/api/new_post', view_func = NewPost.as_view('new_post'), methods = ['POST'])
 app_blueprint.add_url_rule('/api/view_post', view_func = ViewPost.as_view('view_post'), methods = ['GET'])
+app_blueprint.add_url_rule('/api/view_board', view_func = ListThreads.as_view('view_board'), methods = ['GET'])
+app_blueprint.add_url_rule('/api/view_unistream', view_func = ViewUnistream.as_view('view_unistream'), methods = ['GET'])
 
 #DELETE AFTER DEBUG
 

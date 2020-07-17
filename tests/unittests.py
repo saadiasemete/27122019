@@ -10,6 +10,8 @@ import io
 NEW_BOARD = "/api/new_board"
 NEW_POST = "/api/new_post"
 VIEW_POST = "/api/view_post"
+VIEW_BOARD = "/api/view_board"
+VIEW_UNISTREAM = "/api/view_unistream"
 
 class PostingAndViewing(unittest.TestCase):
     """
@@ -21,14 +23,11 @@ class PostingAndViewing(unittest.TestCase):
         if the standard thread creation
         has fallen
         """
-        ThisData = {
-            "board_id": 1,
-            "reply_to": None,
-            "title": "test thread",
-            "text": "Создаем тестовый тред (теперь и с картинкой)",
-            "tripcode": None,
-            "sage": False
-        },
+        ThisData =dict(
+            (('board_id', 1,),
+            ('title', "test thread",),
+            ('text', "adfsf",),)
+        ) #it keeps self-identifying as a tuple otherwise, idk why
         ThisData['files'] = [
             (prepare_image(), 'file1.jpg'),
             (prepare_image(), 'file2.jpg'),
@@ -147,3 +146,31 @@ class ThreadSage(PostingAndViewing):
         self.assertEqual(post_viewed['data'][0]['timestamp'], 
                         post_viewed['data'][0]['timestamp_last_bump'], 
                         "Sage failed")
+
+class ListThreads(PostingAndViewing):
+    def runTest(self):
+        length = int(self.FlaskApp.config['BOARD_PAGE_LENGTH']*1.5)
+        for i in range(length):
+            self.create_thread_unsafe()
+        board_viewed = self.TestClient.get(VIEW_BOARD, query_string = {"board_id":1}).json
+        self.assertEqual(len(board_viewed['data']), 
+                        self.FlaskApp.config['BOARD_PAGE_LENGTH'], 
+                        "Issue with the first page")
+        board_viewed = self.TestClient.get(VIEW_BOARD, query_string = {"board_id":1, "page":2}).json
+        self.assertEqual(len(board_viewed['data']), 
+                        length-self.FlaskApp.config['BOARD_PAGE_LENGTH'], 
+                        "Issue with the remaining posts")
+
+class ListPostsInUnistream(PostingAndViewing):
+    def runTest(self):
+        length = int(self.FlaskApp.config['UNISTREAM_PAGE_LENGTH']*1.5)
+        for i in range(length):
+            self.create_thread_unsafe()
+        board_viewed = self.TestClient.get(VIEW_UNISTREAM).json
+        self.assertEqual(len(board_viewed['data']), 
+                        self.FlaskApp.config['UNISTREAM_PAGE_LENGTH'], 
+                        "Issue with the first page")
+        board_viewed = self.TestClient.get(VIEW_UNISTREAM, query_string = {"page":2}).json
+        self.assertEqual(len(board_viewed['data']), 
+                        length-self.FlaskApp.config['UNISTREAM_PAGE_LENGTH'], 
+                        "Issue with the remaining posts")

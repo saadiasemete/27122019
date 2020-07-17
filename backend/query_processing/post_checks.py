@@ -25,7 +25,8 @@ def is_digit(value):
     return isinstance(value, int) or isinstance(value, str) and value.isdigit()
 
 def is_board_inexistent(data, db_session):
-    board_result = db_session.query(Board.id).filter(Board.id == data['__data__']['board_id']).all()
+    board_result = db_session.query(Board.id).filter(
+        Board.id == data['__data__'].get('board_id', -1)).all()
     if not len(board_result):
         return (404, "board_id does not exist")
     elif len(board_result)>1:
