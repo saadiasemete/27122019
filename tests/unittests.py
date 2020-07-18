@@ -6,12 +6,14 @@ from .qa_utilities import create_board, prepare_image, create_thread
 import os
 import requests
 import io
+import time
 
 NEW_BOARD = "/api/new_board"
 NEW_POST = "/api/new_post"
 VIEW_POST = "/api/view_post"
 VIEW_BOARD = "/api/view_board"
 VIEW_UNISTREAM = "/api/view_unistream"
+GET_UPDATES = "/api/get_updates"
 
 class PostingAndViewing(unittest.TestCase):
     """
@@ -32,7 +34,7 @@ class PostingAndViewing(unittest.TestCase):
             (prepare_image(), 'file1.jpg'),
             (prepare_image(), 'file2.jpg'),
         ]
-        self.TestClient.post(NEW_POST, data = ThisData)
+        return self.TestClient.post(NEW_POST, data = ThisData)
 
 
     def setUp(self):
@@ -174,3 +176,26 @@ class ListPostsInUnistream(PostingAndViewing):
         self.assertEqual(len(board_viewed['data']), 
                         length-self.FlaskApp.config['UNISTREAM_PAGE_LENGTH'], 
                         "Issue with the remaining posts")
+
+class CheckPostUpdates(PostingAndViewing):
+    def runTest(self):
+        """
+        Need to get this stuff done
+        """
+        timestamp = time.time()
+        length = int(self.FlaskApp.config['UPDATE_LIMIT']*1.5)
+        for i in range(length):
+            self.create_thread_unsafe()
+        board_viewed = self.TestClient.get(GET_UPDATES, query_string = {"board_id":1, "timestamp": timestamp}).json
+        self.assertEqual(len(board_viewed['data']), 
+                        self.FlaskApp.config['UPDATE_LIMIT'], 
+                        "Issue with the length of updates in board view")
+        for i in range(length):
+            self.create_thread_unsafe()
+        timestamp = board_viewed['data'][0]['timestamp']
+        unistream_viewed = self.TestClient.get(GET_UPDATES, query_string = {"timestamp": timestamp}).json
+        elf.assertEqual(len(unistream_viewed['data']), 
+                        self.FlaskApp.config['UPDATE_LIMIT'], 
+                        "Issue with the length of updates in unistream")
+        
+        

@@ -1,6 +1,7 @@
 from ..database import Board, Ban, Post, Captcha
 import time
 from sqlalchemy import and_
+import datetime
 
 
 def is_invalid_data(data, db_session):
@@ -9,6 +10,38 @@ def is_invalid_data(data, db_session):
     
     return (None, None)
 
+def is_timestamp_present(data, db_session):
+    def get_posix_timestamp(timestamp):
+        timestamp = float(timestamp)
+        return datetime.datetime.fromtimestamp(timestamp)
+    convert_functions = [
+        get_posix_timestamp,
+        datetime.datetime.fromisoformat,
+    ]
+    timestamp = data['__data__'].get('timestamp')
+    if not timestamp:
+        return (400, "No timestamp")
+    for i in convert_functions:
+        try:
+            return (None, i(timestamp))
+        except:
+            pass
+    return (400, "Unparseable timestamp") 
+    
+def is_correct_update_query(data, db_session):
+    thread_id = data['__data__'].get('thread_id')
+    post_id = data['__data__'].get('post_id')
+    board_id = data['__data__'].get('board_id')
+    if thread_id:
+        update_target = {'type':'thread','target':thread_id}
+    elif post_id:
+        update_target = {'type':'post','target':post_id}
+    elif board_id:
+        update_target = {'type':'board','target':board_id}
+    else:
+        update_target = {'type':'unistream','target':None}
+    return (None, update_target)
+    
 def is_invalid_board_id(data, db_session):
     try:
         assert data['__data__']['board_id'] #should be not null
@@ -46,15 +79,29 @@ def is_board_address_existent(data, db_session):
         return (500, "Ambiguous board_address")
     return (None, None)
 
-def is_thread_inexistent(data, db_session):
-    if not data['__data__'].get('to_thread'):
+def is_thread_inexistent(data, db_session, target='to_thread'):
+    if not data['__data__'].get(target):
         return (None, 0)
-    
-    post_result = db_session.query(Post.id).filter(Post.id == data['__data__']['to_thread']).all()
+    post_result = db_session.query(Post.id).filter(
+        Post.id == data['__data__'][target],
+        Post.to_thread == 0
+        ).all()
     if not len(post_result):
-        return (404, "to_thread does not exist")
+        return (404, "%s does not exist"%target)
     elif len(post_result)>1:
-        return (500, "Ambiguous to_thread")
+        return (500, "Ambiguous %s"%target)
+    return (None, post_result)
+
+def is_post_inexistent(data, db_session, target='post_id'):
+    if not data['__data__'].get(target):
+        return (None, 0)
+    post_result = db_session.query(Post.id).filter(
+        Post.id == data['__data__'][target],
+        ).all()
+    if not len(post_result):
+        return (404, "%s does not exist"%target)
+    elif len(post_result)>1:
+        return (500, "Ambiguous %s"%target)
     return (None, post_result)
 
 def is_banned(data, db_session):

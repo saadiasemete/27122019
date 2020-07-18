@@ -19,10 +19,8 @@ class QueryProcessor():
             if testing_mode:
                 break
             if (i.get('condition') and i['condition'](data, db_session)) or not i.get('condition'):
-                check_result = i['checker'](data, db_session)
-                print(i['checker'].__name__)
+                check_result = i['checker'](data, db_session, *i.get('args', []))
                 if check_result[0]:
-                    print(check_result)
                     return check_result
                 else:
                     data['__checkers__'][i['checker'].__name__] = check_result[1]
