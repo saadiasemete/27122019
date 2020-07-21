@@ -38,4 +38,11 @@ def pagination(page_length, preview_length, posts, page = None):
     for i in posts_filtered:
         if len(i.text)<preview_length:
             i.text="".join([i.text[:preview_length],generate_show_more_text()])
-    return posts_filtered
+
+    result = {
+        'num_posts_total': len(posts),
+        'num_pages_total': total_pages,
+        'posts_per_page': page_length,
+        'posts_current_page': posts_filtered,
+    }
+    return result

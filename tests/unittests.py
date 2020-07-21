@@ -11,8 +11,7 @@ import time
 NEW_BOARD = "/api/new_board"
 NEW_POST = "/api/new_post"
 VIEW_POST = "/api/view_post"
-VIEW_BOARD = "/api/view_board"
-VIEW_UNISTREAM = "/api/view_unistream"
+PAGINATION = "/api/pagination"
 GET_UPDATES = "/api/get_updates"
 
 class PostingAndViewing(unittest.TestCase):
@@ -154,12 +153,12 @@ class ListThreads(PostingAndViewing):
         length = int(self.FlaskApp.config['BOARD_PAGE_LENGTH']*1.5)
         for i in range(length):
             self.create_thread_unsafe()
-        board_viewed = self.TestClient.get(VIEW_BOARD, query_string = {"board_id":1}).json
-        self.assertEqual(len(board_viewed['data']), 
+        board_viewed = self.TestClient.get(PAGINATION, query_string = {"board_id":1}).json
+        self.assertEqual(len(board_viewed['data']['posts_current_page']), 
                         self.FlaskApp.config['BOARD_PAGE_LENGTH'], 
                         "Issue with the first page")
-        board_viewed = self.TestClient.get(VIEW_BOARD, query_string = {"board_id":1, "page":2}).json
-        self.assertEqual(len(board_viewed['data']), 
+        board_viewed = self.TestClient.get(PAGINATION, query_string = {"board_id":1, "page":2}).json
+        self.assertEqual(len(board_viewed['data']['posts_current_page']), 
                         length-self.FlaskApp.config['BOARD_PAGE_LENGTH'], 
                         "Issue with the remaining posts")
 
@@ -168,12 +167,12 @@ class ListPostsInUnistream(PostingAndViewing):
         length = int(self.FlaskApp.config['UNISTREAM_PAGE_LENGTH']*1.5)
         for i in range(length):
             self.create_thread_unsafe()
-        board_viewed = self.TestClient.get(VIEW_UNISTREAM).json
-        self.assertEqual(len(board_viewed['data']), 
+        board_viewed = self.TestClient.get(PAGINATION).json
+        self.assertEqual(len(board_viewed['data']['posts_current_page']), 
                         self.FlaskApp.config['UNISTREAM_PAGE_LENGTH'], 
                         "Issue with the first page")
-        board_viewed = self.TestClient.get(VIEW_UNISTREAM, query_string = {"page":2}).json
-        self.assertEqual(len(board_viewed['data']), 
+        board_viewed = self.TestClient.get(PAGINATION, query_string = {"page":2}).json
+        self.assertEqual(len(board_viewed['data']['posts_current_page']), 
                         length-self.FlaskApp.config['UNISTREAM_PAGE_LENGTH'], 
                         "Issue with the remaining posts")
 
@@ -194,7 +193,7 @@ class CheckPostUpdates(PostingAndViewing):
             self.create_thread_unsafe()
         timestamp = board_viewed['data'][0]['timestamp']
         unistream_viewed = self.TestClient.get(GET_UPDATES, query_string = {"timestamp": timestamp}).json
-        elf.assertEqual(len(unistream_viewed['data']), 
+        self.assertEqual(len(unistream_viewed['data']), 
                         self.FlaskApp.config['UPDATE_LIMIT'], 
                         "Issue with the length of updates in unistream")
         

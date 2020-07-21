@@ -28,7 +28,7 @@ def is_timestamp_present(data, db_session):
             pass
     return (400, "Unparseable timestamp") 
     
-def is_correct_update_query(data, db_session):
+def is_correct_update_pagination_query(data, db_session):
     thread_id = data['__data__'].get('thread_id')
     post_id = data['__data__'].get('post_id')
     board_id = data['__data__'].get('board_id')

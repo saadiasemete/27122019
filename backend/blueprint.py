@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, current_app, send_from_directory
 from flask.views import View
 from flask import Blueprint
 from .query_processing import SubmitBoard, SubmitPost, OpenPost, ThreadListing, PostListing, PostUpdates
+from .query_processing import Pagination as PaginationQuery
 from .query_processing import utils as query_utils
 from sqlalchemy import create_engine
 from sqlalchemy.sql import sqltypes
@@ -130,6 +131,16 @@ def unf_list(input_list):
         for i in input_list
     ]
 
+def process_pagination_data(pag_data):
+    """
+    Implies that pag_data will have the following:
+    - num_posts_total
+    - num_pages_total
+    - posts_per_page
+    - posts_current_page // - here go the threads
+    """
+    pag_data['posts_current_page'] = unf_list(pag_data['posts_current_page'])
+    return pag_data
 
 class StandardRequest(View):
     
@@ -172,15 +183,10 @@ class ViewPost(StandardRequest):
     query_processor = OpenPost
     answer_processor = unf_list
 
-class ListThreads(StandardRequest):
+class Pagination(StandardRequest):
     target_status = 200
-    query_processor = ThreadListing
-    answer_processor = unf_list
-
-class ViewUnistream(StandardRequest):
-    target_status = 200
-    query_processor = PostListing
-    answer_processor = unf_list
+    query_processor = PaginationQuery
+    answer_processor = process_pagination_data
 
 class GetUpdates(StandardRequest):
     target_status = 200
@@ -191,8 +197,7 @@ class GetUpdates(StandardRequest):
 app_blueprint.add_url_rule('/api/new_board', view_func = NewBoard.as_view('new_board'), methods = ['POST'])
 app_blueprint.add_url_rule('/api/new_post', view_func = NewPost.as_view('new_post'), methods = ['POST'])
 app_blueprint.add_url_rule('/api/view_post', view_func = ViewPost.as_view('view_post'), methods = ['GET'])
-app_blueprint.add_url_rule('/api/view_board', view_func = ListThreads.as_view('view_board'), methods = ['GET'])
-app_blueprint.add_url_rule('/api/view_unistream', view_func = ViewUnistream.as_view('view_unistream'), methods = ['GET'])
+app_blueprint.add_url_rule('/api/pagination', view_func = Pagination.as_view('pagination'), methods = ['GET'])
 app_blueprint.add_url_rule('/api/get_updates', view_func = GetUpdates.as_view('get_updates'), methods = ['GET'])
 
 #DELETE AFTER DEBUG
