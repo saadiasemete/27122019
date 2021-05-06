@@ -1,7 +1,13 @@
 from flask import Flask, request, jsonify, current_app, send_from_directory
 from flask.views import View
 from flask import Blueprint
-from .query_processing import SubmitBoard, SubmitPost, OpenPost, ThreadListing, PostListing, PostUpdates
+from .query_processing import(
+    SubmitBoard,
+    SubmitPost,
+    OpenPost,
+    PostUpdates,
+    FetchBoards,
+) 
 from .query_processing import Pagination as PaginationQuery
 from .query_processing import utils as query_utils
 from sqlalchemy import create_engine
@@ -171,34 +177,122 @@ class StandardRequest(View):
         return jsonify(response), answer[0]
 
 class NewBoard(StandardRequest):
+    """
+    POST
+    {body}
+    name : string : required
+    address : string : required
+    description : string : default None
+    hidden : boolean : default False
+    admin_only : boolean : default False
+    read_only : boolean : default False
+    ===
+    Creates a new board.
+    """
     target_status = 201
     query_processor = SubmitBoard
 
 class NewPost(StandardRequest):
+    """
+    POST
+    {body}
+    board_id : int|string : required
+    to_thread : int|string : default None
+    reply_to : int|string : default None
+    title : string : default <BLANK>
+    text : string : default <BLANK>
+    sage : boolean : default False
+    ===
+    If to_thread is not specified, creates a thread,
+    otherwise creates a post.
+    Particular conditions depend on settings.
+    """
     target_status = 201
     query_processor = SubmitPost
 
 class ViewPost(StandardRequest):
+    """
+    GET
+    {params}
+    post_id : int|string : required
+    ===
+    Gets the post specified, and nothing else.
+    """
     target_status = 200
     query_processor = OpenPost
     answer_processor = unf_list
 
 class Pagination(StandardRequest):
+    """
+    GET
+    {params}
+    target_type : string : required
+    target : string : conditional
+    page : int|string : default 1
+    ===
+    Result depends on target_type.
+    1. thread
+    Returns the specified page in the target thread.
+    2. board
+    Returns the specified page in the target board.
+    3. post
+    Returns the specified page of replies to the target post.
+    4. unistream
+    Returns the specifed page of the unistream.
+    """
     target_status = 200
     query_processor = PaginationQuery
     answer_processor = process_pagination_data
 
 class GetUpdates(StandardRequest):
+    """
+    GET
+    {params}
+    target_type : string : required
+    target : string : conditional
+    ===
+    Result depends on target_type.
+    1. thread
+    Returns new posts in the target thread.
+    2. board
+    Returns new threads in the target board.
+    3. post
+    Returns new replies to the target post.
+    4. unistream
+    Returns new posts in the unistream.
+    """
     target_status = 200
     query_processor = PostUpdates
     answer_processor = unf_list
 
+class ViewPost(StandardRequest):
+    """
+    GET
+    {params}
+    post_id : int|string : required
+    ===
+    Gets the post specified, and nothing else.
+    """
+    target_status = 200
+    query_processor = OpenPost
+    answer_processor = unf_list
+
+class ListBoards(StandardRequest):
+    """
+    GET
+    ===
+    Gets the list of all boards.
+    """
+    target_status = 200
+    query_processor = FetchBoards
+    answer_processor = unf_list
 
 app_blueprint.add_url_rule('/api/new_board', view_func = NewBoard.as_view('new_board'), methods = ['POST'])
 app_blueprint.add_url_rule('/api/new_post', view_func = NewPost.as_view('new_post'), methods = ['POST'])
 app_blueprint.add_url_rule('/api/view_post', view_func = ViewPost.as_view('view_post'), methods = ['GET'])
 app_blueprint.add_url_rule('/api/pagination', view_func = Pagination.as_view('pagination'), methods = ['GET'])
 app_blueprint.add_url_rule('/api/get_updates', view_func = GetUpdates.as_view('get_updates'), methods = ['GET'])
+app_blueprint.add_url_rule('/api/list_boards', view_func = ListBoards.as_view('list_boards'), methods = ['GET'])
 
 #DELETE AFTER DEBUG
 
