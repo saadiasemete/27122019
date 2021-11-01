@@ -154,8 +154,25 @@ class StandardRequest(View):
     target_status = 200
     query_processor = NotImplemented
     answer_processor = json_from_sqlalchemy_row
+
+    @classmethod
+    def preprocess_response(cls, response):
+        response_jsonified = jsonify(response)
+        response_jsonified.headers.add("Access-Control-Allow-Origin", "*")
+        return response_jsonified 
+    
+    @classmethod
+    def _build_cors_prelight_response(cls):
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add('Access-Control-Allow-Headers', "*")
+        response.headers.add('Access-Control-Allow-Methods', "*")
+        return response 
+
     def dispatch_request(self):
         
+        if request.method == 'OPTIONS':
+            return self.__class__._build_cors_prelight_response()
         data = self.__class__.data_fetcher()
         db_session = current_app.session_generator(
             bind = current_app.sql_engine
@@ -174,7 +191,7 @@ class StandardRequest(View):
                     'info': None if len(answer)==2 else answer[2], #for details on errors
                 }
         db_session.close()
-        return jsonify(response), answer[0]
+        return self.__class__.preprocess_response(response), answer[0]
 
 class NewBoard(StandardRequest):
     """
